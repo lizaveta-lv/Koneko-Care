@@ -3,14 +3,14 @@ import groundImage from './assets/back.png'
 import wallImage from './assets/walls.png'
 import catImg from './assets/cat.png'
 
-var loaderSceneConfig = {
+const loaderSceneConfig = {
     key: 'loader',
     active: true,
     preload: preload,
     create: create
 };
 
-var config = {
+const config = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
     width: 1000,
@@ -23,21 +23,19 @@ var config = {
     },
     scene: [ loaderSceneConfig ] 
 };
-
-
-var game = new Phaser.Game(config);
+const game = new Phaser.Game(config);
 //srites
 let ground;
 let walls;
 let cat;
 //decaying stats
-let catHealth = 100; //for the purpose of debuging add values
-let catHunger = 100;
-let catDomestication = 0;
+let catHealth; //for the purpose of debuging add values
+let catHunger;
+let catDomestication;
 //expendables
-let money = 200;
-let food = 0;
-let medicine = 0;
+let money;
+let food;
+let medicine;
 //UI
 let statText;
 let expendText;
@@ -46,6 +44,24 @@ let increaseMoneyInterval;
 let decreaseHungerInterval;
 let decreaseHealthInterval;
 let changeDomesticationInterval;
+//loading from storage
+//window.localStorage.clear();  //use this to reset stats
+if(window.localStorage.getItem('catHealth')===null){
+    //default values
+    catHealth = 100;
+    catHunger = 100;
+    catDomestication = 0;
+    money = 200;
+    food = 0;
+    medicine = 0;
+    console.log("storage is empty");
+    savestate();
+}
+else{
+    loadstate();
+    console.log("info being loaded");
+}
+let autosave;
 
 function preload(){
     this.load.image('ground', groundImage);
@@ -63,16 +79,15 @@ function create(){
     startStarvation();
     changeDomesticationInterval = setInterval(checkDomestication, 350);
     increaseMoneyInterval = setInterval(increaseMoney, 500);
+    console.log("autosave begins");
+    autosave = setInterval(savestate, 5000);
     //cat
     cat = this.add.sprite(500, 300, 'cat')
     this.physics.add.existing(cat);
-    cat.body.setVelocity(150, 200);
+    cat.body.setVelocity(150, 90);
     cat.body.setBounce(1, 1);
     cat.body.setCollideWorldBounds(true);
     cat.setInteractive({ useHandCursor: true }).on('pointerup', () => feedCat());
-    
- 
-
 }
 function update(){
     this.physics.arcade.collide(cat, walls)
@@ -134,4 +149,21 @@ function checkDomestication(){
         cat.setActive(false).setVisible(false); 
         alert('Your cat ran away!');
     }
+}
+function savestate(){
+    window.localStorage.setItem('catHealth',catHealth);
+    window.localStorage.setItem('catHunger',catHunger);
+    window.localStorage.setItem('catDomestication',catDomestication);
+    window.localStorage.setItem('money',money);
+    window.localStorage.setItem('food',food);
+    window.localStorage.setItem('medicine',medicine);
+    console.log("saving...");
+}
+function loadstate(){
+    catHealth=parseInt(window.localStorage.getItem('catHealth'));
+    catHunger=parseInt(window.localStorage.getItem('catHunger'));
+    catDomestication=parseInt(window.localStorage.getItem('catDomestication'));
+    money=parseInt(window.localStorage.getItem('money'));
+    food=parseInt(window.localStorage.getItem('food'));
+    medicine=parseInt(window.localStorage.getItem('medicine'));
 }
