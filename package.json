@@ -6,8 +6,8 @@
   "main": "index.js",
   "scripts": {
     "start": "cordova run -- --livereload",
-    "build": "parcel build www/js/index.js -d www/dist",
-    "browser": "npm run build && cordova run browser",
+    "android:build": "cordova build android -- --webpack.mode=production",
+    "android": "cordova run android",
     "prettier": "prettier --write src/"
   },
   "author": "liza",
