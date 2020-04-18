@@ -5,7 +5,7 @@
   "description": "Koneko game",
   "main": "index.js",
   "scripts": {
-    "start": "cordova run -- --livereload",
+    "start": "cordova run browser -- --livereload",
     "android:build": "cordova build android -- --webpack.mode=production",
     "android": "cordova run android",
     "prettier": "prettier --write src/"
