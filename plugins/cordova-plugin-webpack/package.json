@@ -4,17 +4,7 @@
   "_inBundle": false,
   "_integrity": "sha512-FGN1KkqeqBKr42yoiu8X05yiGvnj2/7BtqDCQDvUz6EmaKmryCVw7PGrrN3ipe23dhssWZdad7DnQBzcKLe26A==",
   "_location": "/cordova-plugin-webpack",
-  "_phantomChildren": {
-    "@types/color-name": "1.1.1",
-    "camelcase": "5.3.1",
-    "decamelize": "1.2.0",
-    "get-caller-file": "2.0.5",
-    "require-directory": "2.1.1",
-    "require-main-filename": "2.0.0",
-    "set-blocking": "2.0.0",
-    "which-module": "2.0.0",
-    "y18n": "4.0.0"
-  },
+  "_phantomChildren": {},
   "_requested": {
     "type": "tag",
     "registry": true,
@@ -32,7 +22,7 @@
   "_resolved": "https://registry.npmjs.org/cordova-plugin-webpack/-/cordova-plugin-webpack-1.0.2.tgz",
   "_shasum": "f1a0d258ead07b7623aa16f5fdb9a50a7be440bb",
   "_spec": "cordova-plugin-webpack",
-  "_where": "/Users/roman/dev/liza/koneko/c/koneko",
+  "_where": "/Users/roman/dev/liza/koneko-clone",
   "author": {
     "name": "Kotaro Sugawara"
   },
