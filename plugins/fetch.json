@@ -18,7 +18,7 @@
   "cordova-plugin-webpack": {
     "source": {
       "type": "registry",
-      "id": "cordova-plugin-webpack"
+      "id": "cordova-plugin-webpack@^1.0.2"
     },
     "is_top_level": true,
     "variables": {}
