@@ -23,9 +23,18 @@ const config = {
   },
   scene: [loaderSceneConfig],
 };
-//modal
-let modal = document.getElementById("myModal");
-let span = document.getElementsByClassName("close")[0];
+//============================================================================================================
+//modal windows
+let modalAlert = document.getElementById("modalAlert");
+let modalMenu = document.getElementById("modalMenu");
+//TODO: implement modal shop
+let closeAlert = document.getElementsByClassName("close")[0];
+let closeMenu = document.getElementsByClassName("close")[1];
+//menu buttons
+let btnCreateAcc = document.getElementById("btnCreateAcc");
+let btnDeleteAcc = document.getElementById("btnDeleteAcc");
+let btnClearAcc = document.getElementById("btnClearAcc");
+let btnLogOut = document.getElementById("btnLogOut");
 //sprites
 let ground;
 let walls;
@@ -43,13 +52,21 @@ let medicine;
 //UI
 let statText;
 let expendText;
+let menuButton;
+let shopButton;
 //decaying intervals
 let increaseMoneyInterval;
 let decreaseValuesInterval;
-
+//storage
+let autosave;
+//============================================================================================================
 export function startGame() {
   const game = new Phaser.Game(config);
-  if (window.localStorage.getItem('catHealth') == null ) {
+}
+
+//loading from storage
+window.localStorage.clear();  //use this to reset stats
+if (window.localStorage.getItem('catHealth') == null ) {
   //default values
   catHealth = 100;
   catHunger = 100;
@@ -63,14 +80,6 @@ export function startGame() {
   loadstate();
   console.log('info being loaded');
 }
-}
-
-//loading from storage
-//window.localStorage.clear();  //use this to reset stats
-
-
-let autosave;
-
 function preload() {
   this.load.image('ground', '/img/back.png');
   this.load.image('cat', '/img/cat.png');
@@ -81,16 +90,24 @@ function create() {
   ground = this.add.sprite(500, 300, 'ground');
   walls = this.add.sprite(500, 300, 'walls');
   //UI
-  statText = this.add.text(16, 16, 'Cat Stats', {
+  statText = this.add.text(830, 16, 'Cat Stats', {
     fontSize: '24px',
     fill: '#000',
   });
-  expendText = this.add.text(850, 16, 'Money \nFood \nMedicine', {
+  expendText = this.add.text(16, 570, 'Money \nFood \nMedicine', {
     fontSize: '24px',
     fill: '#000',
   });
+  menuButton = this.add.text(910, 570, 'Menu', {
+    fontSize: '24px',
+    fill: '#000',
+  }).setInteractive().on('pointerup', () => menuOpen());
+  shopButton = this.add.text(16, 16, 'Shop',{
+    fontSize: '24px',
+    fill: '#000',
+  }).setInteractive().on('pointerup', () => shopOpen());
   //start intervals
-  decreaseValuesInterval = setInterval(decayValues, 600);
+  decreaseValuesInterval = setInterval(decayValues, 1000);
   increaseMoneyInterval = setInterval(increaseMoney, 500);
   console.log('autosave begins');
   autosave = setInterval(savestate, 5000);
@@ -105,9 +122,20 @@ function create() {
 function update() {
   this.physics.arcade.collide(cat, walls);
 }
-//modal window
-span.onclick = function() {
-  modal.style.display = "none";
+//============================================================================================================
+//modal window close buttons
+closeAlert.onclick = function() {
+  modalAlert.style.display = "none";
+}
+closeMenu.onclick = function() {
+  modalMenu.style.display = "none";
+}
+//modal window open
+function menuOpen(){
+  modalMenu.style.display = "block";
+}
+function shopOpen(){
+
 }
 //new method for decaying values
 function decayValues(){
@@ -124,7 +152,7 @@ function decayValues(){
 
     if (catHunger == 0){ 
       document.getElementById("modalText").innerHTML = "Your cat is starving!";
-      modal.style.display = "block";
+      modalAlert.style.display = "block";
       isStarving = true;
       console.log("cat is starving");
     }
@@ -144,7 +172,7 @@ function decayValues(){
     }
   }else if (isGameEnd == true){
     document.getElementById("modalText").innerHTML = "Your cat ran away!";
-    modal.style.display = "block";
+    modalAlert.style.display = "block";
     cat.setActive(false).setVisible(false);
   }
 
@@ -163,11 +191,11 @@ function decayValues(){
   }
 //update UI
   statText.setText(
-    'Cat Stats:\nHealth: ' +
+    'Cat Stats:\nHealth\n' +
       catHealth +
-      '\nHunger: ' +
+      '\nHunger\n' +
       catHunger +
-      '\nDomestication: ' +
+      '\nDomest\n' +
       catDomestication +
       '%'
   );
@@ -180,15 +208,29 @@ function feedCat() {
   }
   catHunger = catHunger + 10;
   expendText.setText(
-    'Money\n' + money + '\nFood\n' + food + '\nMedicine\n' + medicine
+    'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
   );
 }
 function increaseMoney() {
   money++;
   expendText.setText(
-    'Money\n' + money + '\nFood\n' + food + '\nMedicine\n' + medicine
+    'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
   );
 }
+//============================================================================================================
+btnCreateAcc.onclick = function(){
+  //create new account, save current game and open new game for new account
+}
+btnDeleteAcc.onclick = function(){
+  //delete current account, redirect to login page
+}
+btnClearAcc.onclick = function(){
+  //clear storage of current account
+}
+btnLogOut.onclick = function(){
+  //save current game and redirect to login page
+}
+//============================================================================================================
 function savestate() {
   window.localStorage.setItem('catHealth', catHealth);
   window.localStorage.setItem('catHunger', catHunger);
