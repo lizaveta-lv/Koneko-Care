@@ -66,7 +66,7 @@ export function startGame() {
 
 var timenow,timebefore,timediff;
 //loading from storage
-window.localStorage.clear();  //use this to reset stats
+//window.localStorage.clear();  //use this to reset stats
 if (window.localStorage.getItem('catHealth') == null ) {
   //default values
   catHealth = 100;
