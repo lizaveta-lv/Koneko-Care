@@ -64,8 +64,9 @@ export function startGame() {
   const game = new Phaser.Game(config);
 }
 
+var timenow,timebefore,timediff;
 //loading from storage
-window.localStorage.clear();  //use this to reset stats
+//window.localStorage.clear();  //use this to reset stats
 if (window.localStorage.getItem('catHealth') == null ) {
   //default values
   catHealth = 100;
@@ -238,6 +239,8 @@ function savestate() {
   window.localStorage.setItem('money', money);
   window.localStorage.setItem('food', food);
   window.localStorage.setItem('medicine', medicine);
+  timebefore=new Date();
+  window.localStorage.setItem('timevalue', timebefore.getTime());
   console.log('saving...');
 }
 function loadstate() {
@@ -247,4 +250,11 @@ function loadstate() {
   money = parseInt(window.localStorage.getItem('money'));
   food = parseInt(window.localStorage.getItem('food'));
   medicine = parseInt(window.localStorage.getItem('medicine'));
+  timebefore = new Date();
+  timebefore.setTime(parseInt(window.localStorage.getItem('timevalue')));
+  timenow = new Date();
+  timediff = timenow - timebefore;
+  timediff /= 1000;
+  console.log(timediff+" seconds since last opened");
+  
 }
