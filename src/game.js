@@ -63,6 +63,7 @@ let expendText;
 let menuButton;
 let shopButton;
 //decaying intervals
+var decayspeed=3000,earnspeed=1000;
 let increaseMoneyInterval;
 let decreaseValuesInterval;
 //storage
@@ -79,7 +80,7 @@ export function startGame() {
 
 //loading from storage
 var timenow,timebefore,timediff;
-window.localStorage.clear(); //use this to reset stats
+//window.localStorage.clear(); //use this to reset stats
 if (window.localStorage.getItem('catHealth') == null) {
   //default values
   catHealth = 100;
@@ -130,10 +131,10 @@ function create() {
     .on('pointerup', () => shopOpen());
 
   //start intervals
-  decreaseValuesInterval = setInterval(decayValues, 1000);
-  increaseMoneyInterval = setInterval(increaseMoney, 500);
+  decreaseValuesInterval = setInterval(decayValues, decayspeed);
+  increaseMoneyInterval = setInterval(increaseMoney, earnspeed);
   console.log('autosave begins');
-  autosave = setInterval(savestate, 5000);
+  autosave = setInterval(savestate, 1000);
 
   //cat
   cat = this.add.sprite(500, 300, 'cat');
@@ -260,6 +261,50 @@ function decayValues() {
   );
 }
 
+function offscreenDecay(){
+  if (catHunger !== 0) {
+    isStarving = false;
+  }
+
+  if (isStarving == false && isGameEnd == false) {
+    catHunger--;
+
+    if (catHunger == 0) {
+      isStarving = true;
+    }
+    if (catHunger < 0) {
+      catHunger = 0;
+    } else if (catHunger > 100) {
+      catHunger = 100;
+    }
+  } else if (isStarving == true && isGameEnd == false) {
+    catHealth--;
+    if (catHealth <= 0) {
+      isGameEnd = true;
+    }
+    if (catHealth < 0) {
+      catHealth = 0;
+    }
+  } else if (isGameEnd == true) {
+    cat.setActive(false).setVisible(false);
+  }
+
+  //domestication checks
+  if (catHunger >= 50 && catHealth >= 70) {
+    catDomestication++;
+  } else if (catHunger < 20 || catHealth < 40) {
+    catDomestication--;
+    if (catDomestication < 0) {
+      isGameEnd = true;
+    }
+    if (catDomestication < 0) {
+      catDomestication = 0;
+    }
+  }
+
+
+}
+
 function increaseMoney() {
   money++;
   expendText.setText(
@@ -373,4 +418,10 @@ function loadstate() {
   timediff = timenow - timebefore;
   timediff /= 1000;
   console.log(timediff+" seconds since last opened");
+  for(var i=0;i<timediff;i++){
+    if(i%(decayspeed/1000)==0)
+      offscreenDecay();
+    if(i%(earnspeed/1000)==0)
+      money++;
+  }
 }
