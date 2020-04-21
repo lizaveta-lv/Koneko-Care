@@ -1,6 +1,7 @@
 # Insallation 
 
 `npm i`
+`cordova prepare`
 
 # Develop 
 
