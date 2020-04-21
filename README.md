@@ -1,6 +1,7 @@
 # Insallation 
 
 `npm i`
+`cordova prepare`
 
 # Develop 
 
@@ -22,3 +23,4 @@ it will start webpack dev server with hot reload using [cordova-plugin-webpack](
 ## Code 
 
 `npm run prettier` to "prettify" source files with [Prettier.js](https://prettier.io/)
+or `option+shift+f` to format opened file
