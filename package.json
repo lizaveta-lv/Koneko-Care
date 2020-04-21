@@ -1,6 +1,6 @@
 {
-  "name": "helloworld",
-  "displayName": "HelloCordova",
+  "name": "koneko",
+  "displayName": "Koneko",
   "version": "1.0.0",
   "description": "Koneko game",
   "main": "index.js",
