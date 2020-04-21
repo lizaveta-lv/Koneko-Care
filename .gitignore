@@ -4,5 +4,5 @@
 node_modules/
 dist/
 /platforms
-/plugin
+/plugins
 index.bundle.js
