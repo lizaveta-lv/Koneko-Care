@@ -3,6 +3,9 @@
 `npm i`
 `cordova prepare`
 
+if getting warning `Unable to load PlatformApi from platform...`, run `rm -rf platforms/ plugins/` before `cordova prepare` 
+
+
 # Develop 
 
 `npm start` 
