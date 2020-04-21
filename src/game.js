@@ -11,15 +11,13 @@ const loaderSceneConfig = {
 const config = {
   type: Phaser.AUTO,
   parent: 'phaser-example',
-  width: 1000,
-  height: 600,
-  physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { y: 200 },
-    },
-  },
+  width: 1280,
+  height: 720,
   scene: [loaderSceneConfig],
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+},
 };
 //============================================================================================================
 //modal windows
@@ -45,7 +43,6 @@ let btnUseFood = document.getElementById('btnUseFood');
 let btnUseMedicine = document.getElementById('btnUseMedicine');
 //sprites
 let ground;
-let walls;
 let cat;
 //decaying stats
 let isStarving = new Boolean(false);
@@ -77,6 +74,7 @@ let randomY;
 //============================================================================================================
 export function startGame() {
   const game = new Phaser.Game(config);
+  screen.orientation.lock('landscape');
 }
 
 //loading from storage
@@ -100,31 +98,28 @@ function preload() {
   //load sprites
   this.load.image('ground', '/img/back.png');
   this.load.image('cat', '/img/cat.png');
-  this.load.image('walls', '/img/walls.png');
 }
 function create() {
   //add background sprites
-  ground = this.add.sprite(500, 300, 'ground');
-  walls = this.add.sprite(500, 300, 'walls');
-
+  ground = this.add.sprite(640, 360, 'ground');
   //UI
-  statText = this.add.text(830, 16, 'Cat Stats', {
+  statText = this.add.text(1100, 16, 'Cat Stats', {
     fontSize: '24px',
     fill: '#000',
   });
-  expendText = this.add.text(16, 570, 'Money \nFood \nMedicine', {
+  expendText = this.add.text(16, 680, 'Money \nFood \nMedicine', {
     fontSize: '24px',
     fill: '#000',
   });
   menuButton = this.add
-    .text(910, 570, 'Menu', {
+    .text(16, 16, 'Menu', {
       fontSize: '24px',
       fill: '#000',
     })
     .setInteractive()
     .on('pointerup', () => menuOpen());
   shopButton = this.add
-    .text(16, 16, 'Shop', {
+    .text(16, 50, 'Shop', {
       fontSize: '24px',
       fill: '#000',
     })
@@ -156,8 +151,8 @@ function create() {
 }
 
 function update() {
-  this.physics.arcade.collide(cat, walls);
 }
+
 //============================================================================================================
 //modal window close buttons
 closeAlert.onclick = function () {
@@ -215,6 +210,7 @@ function decayValues() {
     if (catHunger == 0) {
       document.getElementById('modalText').innerHTML = 'Your cat is starving!';
       modalAlert.style.display = 'block';
+      navigator.vibrate(1000);
       isStarving = true;
     }
     if (catHunger < 0) {
@@ -233,6 +229,7 @@ function decayValues() {
   } else if (isGameEnd == true) {
     document.getElementById('modalText').innerHTML = 'Your cat ran away!';
     modalAlert.style.display = 'block';
+    navigator.vibrate(1000);
     cat.setActive(false).setVisible(false);
   }
 
