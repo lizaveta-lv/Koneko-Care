@@ -50,7 +50,7 @@ let cat;
 //decaying stats
 let isStarving = new Boolean(false);
 let isGameEnd = new Boolean(false);
-let catHealth; 
+let catHealth;
 let catHunger;
 let catDomestication;
 //expendables
@@ -63,7 +63,8 @@ let expendText;
 let menuButton;
 let shopButton;
 //decaying intervals
-var decayspeed=3000,earnspeed=1000;
+var decayspeed = 3000,
+  earnspeed = 1000;
 let increaseMoneyInterval;
 let decreaseValuesInterval;
 //storage
@@ -79,7 +80,7 @@ export function startGame() {
 }
 
 //loading from storage
-var timenow,timebefore,timediff;
+var timenow, timebefore, timediff;
 window.localStorage.clear(); //use this to reset stats
 if (window.localStorage.getItem('catHealth') == null) {
   //default values
@@ -261,7 +262,7 @@ function decayValues() {
   );
 }
 
-function offscreenDecay(){
+function offscreenDecay() {
   if (catHunger !== 0) {
     isStarving = false;
   }
@@ -301,8 +302,6 @@ function offscreenDecay(){
       catDomestication = 0;
     }
   }
-
-
 }
 
 function increaseMoney() {
@@ -401,7 +400,7 @@ function savestate() {
   window.localStorage.setItem('money', money);
   window.localStorage.setItem('food', food);
   window.localStorage.setItem('medicine', medicine);
-  timebefore=new Date();
+  timebefore = new Date();
   window.localStorage.setItem('timevalue', timebefore.getTime());
   console.log('saving...');
 }
@@ -417,11 +416,9 @@ function loadstate() {
   timenow = new Date();
   timediff = timenow - timebefore;
   timediff /= 1000;
-  console.log(timediff+" seconds since last opened");
-  for(var i=0;i<timediff;i++){
-    if(i%(decayspeed/1000)==0)
-      offscreenDecay();
-    if(i%(earnspeed/1000)==0)
-      money++;
+  console.log(timediff + ' seconds since last opened');
+  for (var i = 0; i < timediff; i++) {
+    if (i % (decayspeed / 1000) == 0) offscreenDecay();
+    if (i % (earnspeed / 1000) == 0) money++;
   }
 }
