@@ -1,6 +1,11 @@
 import Phaser from 'phaser';
 import MoveTo from 'phaser3-rex-plugins/plugins/moveto.js';
 
+import groundImg from '../www/img/back.png' 
+import catImg from '../www/img/cat.png'
+import wallsImg from '../www/img/walls.png'
+
+
 const loaderSceneConfig = {
   key: 'loader',
   active: true,
@@ -98,9 +103,9 @@ if (window.localStorage.getItem('catHealth') == null) {
 }
 function preload() {
   //load sprites
-  this.load.image('ground', '/img/back.png');
-  this.load.image('cat', '/img/cat.png');
-  this.load.image('walls', '/img/walls.png');
+  this.load.image('ground', groundImg);
+  this.load.image('cat', catImg);
+  this.load.image('walls', wallsImg);
 }
 function create() {
   //add background sprites
