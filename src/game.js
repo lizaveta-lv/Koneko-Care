@@ -50,7 +50,7 @@ let money;
 let food;
 let medicine;
 
-let choise;
+let choice;
 //UI
 let getCatButton;
 let statText;
@@ -74,6 +74,7 @@ let gameEndModalShown = false;
 //
 const vibrDuration = 200;
 
+let shake;
 
 //============================================================================================================
 export function startGame() {
@@ -82,6 +83,9 @@ export function startGame() {
 }
 
 //loading from storage
+var timenow, timebefore, timediff;
+var account="Guest";
+var userEmail="Guest",userPass;
 window.localStorage.clear(); //use this to reset stats
 if (window.localStorage.getItem('catHealth') == null) {
   //default values
@@ -91,7 +95,7 @@ if (window.localStorage.getItem('catHealth') == null) {
   money = 200;
   food = 0;
   medicine = 0;
-  choise = 0;
+  choice = 0;
   console.log('storage is empty');
   savestate();
 } else {
@@ -179,10 +183,10 @@ function create() {
 
   cat.setScale(2);
   cat.visible = false;
-  if (choise == 0){
+  if (choice == 0){
     getCat();
-  }else if (choise >= 1 && choise <= 3){
-    cat.setTexture('cat' + choise.toString(10));
+  }else if (choice >= 1 && choice <= 3){
+    cat.setTexture('cat' + choice.toString(10));
     cat.visible = true;
   }
 
@@ -203,10 +207,9 @@ function create() {
   cat.setInteractive({ useHandCursor: true }).on('pointerup', () => catOpen());
 }
 
-
+function update() {}
 //TODO, dubble tap event
-const onShake = function() {
-  console.log('onShake event received');
+let onShake = function() {
   for (let i = -180; i < 180; i++){
     cat.rotation = i;
   }
@@ -227,39 +230,39 @@ function getCat(){
   document.getElementById('modalGetCat').style.display = 'block';
 }
 
-document.getElementById('catChoise1').addEventListener("click", getChoise1);
-document.getElementById('catChoise2').addEventListener("click", getChoise2);
-document.getElementById('catChoise3').addEventListener("click", getChoise3);
-function getChoise1() {
+document.getElementById('catChoice1').addEventListener("click", getChoice1);
+document.getElementById('catChoice2').addEventListener("click", getChoice2);
+document.getElementById('catChoice3').addEventListener("click", getChoice3);
+function getChoice1() {
   for (let i = 0; i < 3; i++){
-    document.getElementsByClassName('choise')[i].style.backgroundColor = 'transparent';
+    document.getElementsByClassName('choice')[i].style.backgroundColor = 'transparent';
   }
-  document.getElementById('choiseAlert').style.display = 'none';
-  document.getElementsByClassName('choise')[0].style.backgroundColor = "orange";
-  choise = 1;
+  document.getElementById('choiceAlert').style.display = 'none';
+  document.getElementsByClassName('choice')[0].style.backgroundColor = "orange";
+  choice = 1;
 }
 
-function getChoise2() {
+function getChoice2() {
   for (let i = 0; i < 3; i++){
-    document.getElementsByClassName('choise')[i].style.backgroundColor = 'transparent';
+    document.getElementsByClassName('choice')[i].style.backgroundColor = 'transparent';
   }
-  document.getElementById('choiseAlert').style.display = 'none';
-  document.getElementsByClassName('choise')[1].style.backgroundColor = 'orange';
-  choise = 2;
+  document.getElementById('choiceAlert').style.display = 'none';
+  document.getElementsByClassName('choice')[1].style.backgroundColor = 'orange';
+  choice = 2;
 }
-function getChoise3() {
+function getChoice3() {
   for (let i = 0; i < 3; i++){
-    document.getElementsByClassName('choise')[i].style.backgroundColor = 'transparent';
+    document.getElementsByClassName('choice')[i].style.backgroundColor = 'transparent';
   }
-  document.getElementById('choiseAlert').style.display = 'none';
-  document.getElementsByClassName('choise')[2].style.backgroundColor = 'orange';
-  choise = 3;
+  document.getElementById('choiceAlert').style.display = 'none';
+  document.getElementsByClassName('choice')[2].style.backgroundColor = 'orange';
+  choice = 3;
 }
-document.getElementById('btnChoise').onclick = function () {
-  if (choise >= 1 && choise <= 3){
+document.getElementById('btnChoice').onclick = function () {
+  if (choice >= 1 && choice <= 3){
     document.getElementById('modalGetCat').style.display = 'none';
 
-    switch (choise){
+    switch (choice){
       case 1:
         catDomestication = domestication1;
         cat.setTexture('cat1');
@@ -290,7 +293,7 @@ document.getElementById('btnChoise').onclick = function () {
     //decayInterval = setInterval(decayValues, decayspeed);
     //randomMovInterval = setInterval(randomMovement, 8000);
   }else{
-    document.getElementById('choiseAlert').style.display = 'block';
+    document.getElementById('choiceAlert').style.display = 'block';
   }
 
 }
@@ -300,7 +303,7 @@ function gameEnd(){
     modalAlert.style.display = 'block';
     navigator.vibrate(vibrDuration);
     cat.visible = false;
-    choise = 0;
+    choice = 0;
     clearInterval(decayInterval);
     clearInterval(randomMovInterval);
     gameEndModalShown = true;
@@ -420,16 +423,7 @@ function decayValues() {
     }
   }
 
-  //update UI
-  statText.setText(
-    'Cat Stats:\nHealth\n' +
-      catHealth +
-      '\nHunger\n' +
-      catHunger +
-      '\nDomestication\n' +
-      catDomestication +
-      '%'
-  );
+  updateUI();
 }
 
 function offscreenDecay() {
@@ -481,17 +475,53 @@ function increaseMoney() {
   );
 }
 //============================================================================================================
-document.getElementById('btnCreateAcc').onclick = function () {
-  //create new account, save current game and open new game for new account
+document.getElementById('btnLogin').onclick = function () {
+  userEmail=document.getElementById("emailfield").value;
+  userPass=document.getElementById("pwfield").value;
+  console.log("email:"+userEmail+" pw:"+userPass);
+  firebase.auth().signInWithEmailAndPassword(userEmail, userPass).catch(function(error) {
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    // ...
+    window.alert(errorMessage);
+    window.alert(error.code);
+  });
 };
-document.getElementById('btnDeleteAcc').onclick = function () {
-  //delete current account, redirect to login page
+document.getElementById('btnNewUser').onclick = function () {
+  userEmail=document.getElementById("emailfield").value;
+  userPass=document.getElementById("pwfield").value;
+  firebase.auth().createUserWithEmailAndPassword(userEmail, userPass).catch(function(error) {
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    // ...
+    window.alert(errorMessage);
+  });
 };
 document.getElementById('btnClearAcc').onclick = function () {
-  //clear storage of current account
+  firebase.auth().signOut().then(function() {
+    account="Guest";
+    loadstate();
+  }).catch(function(error) {
+    window.alert(error.message);
+  });
+  window.localStorage.removeItem(account+'-catType');
+  window.localStorage.removeItem(account+'-catHealth');
+  window.localStorage.removeItem(account+'-catHunger');
+  window.localStorage.removeItem(account+'-catDomestication');
+  window.localStorage.removeItem(account+'-money');
+  window.localStorage.removeItem(account+'-food');
+  window.localStorage.removeItem(account+'-medicine');
+  window.localStorage.removeItem(account+'-timevalue');
 };
 document.getElementById('btnLogOut').onclick = function () {
-  //save current game and redirect to login page
+  firebase.auth().signOut().then(function() {
+    account="Guest";
+    loadstate();
+  }).catch(function(error) {
+    window.alert(error.message);
+  });
 };
 //============================================================================================================
 document.getElementById('btnBuyFood').onclick = function () {
@@ -501,6 +531,7 @@ document.getElementById('btnBuyFood').onclick = function () {
     document.getElementById('foodCount').innerHTML = ' x' + food;
     shopMoneyCheck();
   }
+  updateUI();
 };
 document.getElementById('btnBuyMedicine').onclick = function () {
   if (money - 100 >= 0) {
@@ -509,6 +540,7 @@ document.getElementById('btnBuyMedicine').onclick = function () {
     document.getElementById('medicineCount').innerHTML = ' x' + medicine;
     shopMoneyCheck();
   }
+  updateUI();
 };
 function shopMoneyCheck() {
   if (money - 20 < 0) {
@@ -533,9 +565,7 @@ btnUseFood.onclick = function () {
     catHunger = 100;
   }
   itemUsageCheck();
-  //update ui
-  document.getElementById('catStatText').innerHTML =
-    'Hunger: ' + catHunger + '  Health: ' + catHealth;
+  updateUI();
 };
 btnUseMedicine.onclick = function () {
   medicine = medicine - 1;
@@ -544,9 +574,7 @@ btnUseMedicine.onclick = function () {
     catHealth = 100;
   }
   itemUsageCheck();
-  //update ui
-  document.getElementById('catStatText').innerHTML =
-    'Hunger: ' + catHunger + '  Health: ' + catHealth;
+  updateUI();
 };
 function itemUsageCheck() {
   if (food < 1) {
@@ -583,38 +611,73 @@ document.getElementById('btnKeepIt').onclick = function () {
 };
 //============================================================================================================
 function savestate() {
-  
-  window.localStorage.setItem('catHealth', catHealth);
-  window.localStorage.setItem('catHunger', catHunger);
-  window.localStorage.setItem('catDomestication', catDomestication);
-  window.localStorage.setItem('money', money);
-  window.localStorage.setItem('food', food);
-  window.localStorage.setItem('medicine', medicine);
-  window.localStorage.setItem('choise', choise);
-  
-  let timebefore = new Date();
-  window.localStorage.setItem('timevalue', timebefore.getTime());
-  
-  console.log('saving...');
+  window.localStorage.setItem(account+'-catType', choice);
+  window.localStorage.setItem(account+'-catHealth', catHealth);
+  window.localStorage.setItem(account+'-catHunger', catHunger);
+  window.localStorage.setItem(account+'-catDomestication', catDomestication);
+  window.localStorage.setItem(account+'-money', money);
+  window.localStorage.setItem(account+'-food', food);
+  window.localStorage.setItem(account+'-medicine', medicine);
+  timebefore = new Date();
+  window.localStorage.setItem(account+'-timevalue', timebefore.getTime());
+  console.log('saving for '+account);
 }
 function loadstate() {
-  catHealth = parseInt(window.localStorage.getItem('catHealth'));
-  catHunger = parseInt(window.localStorage.getItem('catHunger'));
-  catDomestication = parseInt(window.localStorage.getItem('catDomestication'));
-  money = parseInt(window.localStorage.getItem('money'));
-  food = parseInt(window.localStorage.getItem('food'));
-  medicine = parseInt(window.localStorage.getItem('medicine'));
-  choise = parseInt(window.localStorage.getItem('choise'));
-  let timebefore = new Date();
-  timebefore.setTime(parseInt(window.localStorage.getItem('timevalue')));
-  let timenow = new Date();
-  let timediff = timenow - timebefore;
+  if (window.localStorage.getItem(account+'-catHealth') == null) {
+    //default values
+    choice=0;
+    catHealth = 100;
+    catHunger = 100;
+    catDomestication = 0;
+    money = 200;
+    food = 0;
+    medicine = 0;
+    console.log('storage is empty');
+    getCat();
+    savestate();
+  }
+  else {
+  choice = parseInt(window.localStorage.getItem(account+'-catType'));
+  catHealth = parseInt(window.localStorage.getItem(account+'-catHealth'));
+  catHunger = parseInt(window.localStorage.getItem(account+'-catHunger'));
+  catDomestication = parseInt(window.localStorage.getItem(account+'-catDomestication'));
+  money = parseInt(window.localStorage.getItem(account+'-money'));
+  food = parseInt(window.localStorage.getItem(account+'-food'));
+  medicine = parseInt(window.localStorage.getItem(account+'-medicine'));
+  timebefore = new Date();
+  timebefore.setTime(parseInt(window.localStorage.getItem(account+'-timevalue')));
+  timenow = new Date();
+  timediff = timenow - timebefore;
   timediff /= 1000;
-  console.log("before: ", catHealth, catHunger, catDomestication, money, food, medicine, choise);
-  console.log(timediff + ' seconds since last opened');
+  console.log(timediff + ' seconds since last login by '+account);
+  }
   for (var i = 0; i < timediff; i++) {
     if (i % (decayspeed / 1000) == 0) offscreenDecay();
     if (i % (earnspeed / 1000) == 0) money++;
   }
-  console.log("after: ", catHealth, catHunger, catDomestication, money, food, medicine, choise);
 }
+function updateUI(){
+  statText.setText(
+    'Cat Stats:\nHealth\n' +
+      catHealth +
+      '\nHunger\n' +
+      catHunger +
+      '\nDomestication\n' +
+      catDomestication +
+      '%'
+  );
+  expendText.setText(
+    'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
+  );
+}
+firebase.auth().onAuthStateChanged(function(user){
+  if(user){
+    account=userEmail;
+    loadstate();
+    console.log(userEmail);
+  }
+  else{
+    account="Guest";
+    loadstate();
+  }
+});
