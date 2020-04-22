@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 import MoveTo from 'phaser3-rex-plugins/plugins/moveto.js';
 
-import groundImg from '../www/img/back.png' 
-import catImg from '../www/img/cat.png'
-
+import groundImg from '../www/img/back.png';
+import catImg1 from '../www/img/cat1.png';
+import catImg2 from '../www/img/cat2.png';
+import catImg3 from '../www/img/cat3.png';
 
 const loaderSceneConfig = {
   key: 'loader',
@@ -20,61 +21,63 @@ const config = {
   scene: [loaderSceneConfig],
   scale: {
     mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH
-},
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
 };
 //============================================================================================================
 //modal windows
 let modalAlert = document.getElementById('modalAlert');
-let modalMenu = document.getElementById('modalMenu');
-let modalShop = document.getElementById('modalShop');
-let modalCat = document.getElementById('modalCat');
-//close button
-let closeAlert = document.getElementsByClassName('close')[0];
-let closeMenu = document.getElementsByClassName('close')[1];
-let closeShop = document.getElementsByClassName('close')[2];
-let closeCat = document.getElementsByClassName('close')[3];
-//menu buttons
-let btnCreateAcc = document.getElementById('btnCreateAcc');
-let btnDeleteAcc = document.getElementById('btnDeleteAcc');
-let btnClearAcc = document.getElementById('btnClearAcc');
-let btnLogOut = document.getElementById('btnLogOut');
-//shop buttons
-let btnBuyFood = document.getElementById('btnBuyFood');
-let btnBuyMedicine = document.getElementById('btnBuyMedicine');
 //cat menu buttons
 let btnUseFood = document.getElementById('btnUseFood');
 let btnUseMedicine = document.getElementById('btnUseMedicine');
+//offer buttons and text
+let offerMoney;
 //sprites
 let ground;
 let cat;
+let domestication1;
+let domestication2;
+let domestication3;
+//decaying stats boolean
+let isStarving = false;
+let isGameEnd = false;
 //decaying stats
-let isStarving = new Boolean(false);
-let isGameEnd = new Boolean(false);
 let catHealth;
 let catHunger;
 let catDomestication;
-//expendables
+
 let money;
 let food;
 let medicine;
+
+let choice;
 //UI
+let getCatButton;
 let statText;
 let expendText;
 let menuButton;
 let shopButton;
-//decaying intervals
-var decayspeed = 3000,
-  earnspeed = 1000;
-let increaseMoneyInterval;
-let decreaseValuesInterval;
-//storage
-let autosave;
+let adoptionButton;
+//decay intervals values
+const decayspeed = 1000;
+const earnspeed = 1000;
 //movement
 let moveTo;
-let randomMovementInterval;
 let randomX;
 let randomY;
+//intervals
+let saveInterval;
+let decayInterval;
+let moneyInterval;
+let randomMovInterval;
+//alerts
+let adoptionModalShown = false;
+let gameEndModalShown = false;
+//
+const vibrDuration = 200;
+
+let shake;
+
 //============================================================================================================
 export function startGame() {
   const game = new Phaser.Game(config);
@@ -86,60 +89,101 @@ var timenow, timebefore, timediff;
 var account="Guest";
 var userEmail="Guest",userPass;
 window.localStorage.clear(); //use this to reset stats
-if (window.localStorage.getItem(account+'-catHealth') == null) {
-  //default values
-  catHealth = 100;
-  catHunger = 100;
-  catDomestication = 0;
-  money = 200;
-  food = 0;
-  medicine = 0;
-  console.log('storage is empty');
-  savestate();
-} else {
-  loadstate();
-  console.log('info being loaded');
-}
+//default values
+catHealth = 100;
+catHunger = 100;
+catDomestication = 0;
+money = 200;
+food = 0;
+medicine = 0;
+choice = 0;
+
 function preload() {
   //load sprites
   this.load.image('ground', groundImg);
-  this.load.image('cat', catImg);
+  this.load.image('cat1', catImg1);
+  this.load.image('cat2', catImg2);
+  this.load.image('cat3', catImg3);
+
+  //loading bar TODO: make in pink and slower
+  let loadingBar = this.add.graphics({
+    fillStyle: {
+      color: 0xffffff,
+    },
+  });
+  this.load.on('progress', (percent) => {
+    loadingBar.fillRect(
+      0,
+      this.game.renderer.height / 2,
+      this.game.renderer.width * percent,
+      50
+    );
+  });
 }
 function create() {
   //add background sprites
   ground = this.add.sprite(640, 360, 'ground');
+
+  let textStyle = {
+    fontSize: '40px',
+    fill: '#fff',
+    align: 'center',
+    backgroundColor: '#fca89f',
+    fontWeight: 'bold',
+    fontFamily: 'Comic Neue'
+
+
+  }
   //UI
-  statText = this.add.text(1100, 16, 'Cat Stats', {
-    fontSize: '24px',
-    fill: '#000',
-  });
-  expendText = this.add.text(16, 680, 'Money \nFood \nMedicine', {
-    fontSize: '24px',
-    fill: '#000',
-  });
+  statText = this.add.text(1020, 16, 'Cat Stats', textStyle);
+  expendText = this.add.text(16, 670, ' Money \nFood \nMedicine ', textStyle);
   menuButton = this.add
-    .text(16, 16, 'Menu', {
-      fontSize: '24px',
-      fill: '#000',
-    })
+    .text(16, 16, ' Menu ', textStyle)
     .setInteractive()
     .on('pointerup', () => menuOpen());
   shopButton = this.add
-    .text(16, 50, 'Shop', {
-      fontSize: '24px',
-      fill: '#000',
-    })
+    .text(16, 100, ' Shop ', textStyle)
     .setInteractive()
     .on('pointerup', () => shopOpen());
+  adoptionButton = this.add
+    .text(500, 16, ' Adoption \n Offer ', textStyle)
+    .setInteractive()
+    .on('pointerup', () => offerOpen());
+  adoptionButton.visible = false;
+  getCatButton = this.add.text(800, 670, ' Get Koneko ', textStyle).setInteractive()
+  .on('pointerup', () => getCat());
+  getCatButton.visible = false;
+
+  //update ui before interval call function
+  statText.setText(
+    'Cat Stats:\nHealth\n' +
+      catHealth +
+      '\nHunger\n' +
+      catHunger +
+      '\nDomestication\n' +
+      catDomestication +
+      '%'
+  );
+  expendText.setText(
+    ' Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine + ' '
+  );
 
   //start intervals
-  decreaseValuesInterval = setInterval(decayValues, decayspeed);
-  increaseMoneyInterval = setInterval(increaseMoney, earnspeed);
+  
   console.log('autosave begins');
-  autosave = setInterval(savestate, 1000);
+  
+  cat = this.add.sprite(640, 360, 'cat1');
 
-  //cat
-  cat = this.add.sprite(500, 300, 'cat');
+  cat.setScale(2);
+  cat.visible = false;
+  if (choice == 0){
+    getCat();
+  }else if (choice >= 1 && choice <= 3){
+    cat.setTexture('cat' + choice.toString(10));
+    cat.visible = true;
+  }
+
+  
 
   //movement
   moveTo = new MoveTo(cat, { speed: 100 });
@@ -151,72 +195,203 @@ function create() {
       moveTo.moveTo(touchX, touchY);
     }
   });
-
-  randomMovementInterval = setInterval(randomMovement, 1500);
   cat.setInteractive({ useHandCursor: true }).on('pointerup', () => catOpen());
 }
 
-function update() {
+function update() {}
+//TODO, dubble tap event
+let onShake = function() {
+  for (let i = -180; i < 180; i++){
+    cat.rotation = i;
+  }
+  navigator.vibrate(vibrDuration);
 }
 
 //============================================================================================================
+function getCat(){
+  console.log("get cat called");
+  domestication1 = Math.floor(Math.random() * 12);
+  domestication2 = Math.floor(Math.random() * 12);
+  domestication3 = Math.floor(Math.random() * 12);
+
+  document.getElementById('catDomest1').innerText = 'Domestication: ' + domestication1 + '%';
+  document.getElementById('catDomest2').innerText = 'Domestication: ' + domestication2 + '%';
+  document.getElementById('catDomest3').innerText = 'Domestication: ' + domestication3 + '%';
+  
+  
+  window.localStorage.removeItem(account+'-catType');
+  window.localStorage.removeItem(account+'-catHealth');
+  window.localStorage.removeItem(account+'-catHunger');
+  window.localStorage.removeItem(account+'-catDomestication');
+  window.localStorage.removeItem(account+'-money');
+  window.localStorage.removeItem(account+'-food');
+  window.localStorage.removeItem(account+'-medicine');
+  window.localStorage.removeItem(account+'-timevalue');
+  
+  clearInterval(saveInterval);
+  clearInterval(moneyInterval);
+  clearInterval(decayInterval);
+  clearInterval(randomMovInterval);
+
+  document.getElementById('modalGetCat').style.display = 'block';
+  
+}
+
+document.getElementById('catChoice1').addEventListener("click", getChoice1);
+document.getElementById('catChoice2').addEventListener("click", getChoice2);
+document.getElementById('catChoice3').addEventListener("click", getChoice3);
+function getChoice1() {
+  for (let i = 0; i < 3; i++){
+    document.getElementsByClassName('choice')[i].style.backgroundColor = 'transparent';
+  }
+  document.getElementById('choiceAlert').style.display = 'none';
+  document.getElementsByClassName('choice')[0].style.backgroundColor = "orange";
+  choice = 1;
+}
+
+function getChoice2() {
+  for (let i = 0; i < 3; i++){
+    document.getElementsByClassName('choice')[i].style.backgroundColor = 'transparent';
+  }
+  document.getElementById('choiceAlert').style.display = 'none';
+  document.getElementsByClassName('choice')[1].style.backgroundColor = 'orange';
+  choice = 2;
+}
+function getChoice3() {
+  for (let i = 0; i < 3; i++){
+    document.getElementsByClassName('choice')[i].style.backgroundColor = 'transparent';
+  }
+  document.getElementById('choiceAlert').style.display = 'none';
+  document.getElementsByClassName('choice')[2].style.backgroundColor = 'orange';
+  choice = 3;
+}
+document.getElementById('btnChoice').onclick = function () {
+  
+  if (choice >= 1 && choice <= 3){
+
+    switch (choice){
+      case 1:
+        catDomestication = domestication1;
+        cat.setTexture('cat1');
+        cat.visible = true;
+        break;
+      case 2:
+        catDomestication = domestication2;
+        cat.setTexture('cat2');
+        cat.visible = true;
+        break;
+      case 3:
+        catDomestication = domestication3;
+        cat.setTexture('cat3');
+        cat.visible = true;
+        break;
+      default:
+        catDomestication = 0;
+    };
+
+    document.getElementById('modalGetCat').style.display = 'none';
+    
+    getCatButton.visible= false;
+    isGameEnd = false;
+    isStarving = false;
+    
+    catHealth=100;
+    catHunger=100;
+    catDomestication=0;
+    
+    //start decay and random movement intervals
+    saveInterval=setInterval(savestate, 1000);
+    moneyInterval = setInterval(increaseMoney, earnspeed);
+    decayInterval = setInterval(decayValues, decayspeed);
+    randomMovInterval = setInterval(randomMovement, 8000);
+  
+  }else{
+    document.getElementById('choiceAlert').style.display = 'block';
+  }
+
+}
+function gameEnd(){
+    document.getElementById('modalText').innerHTML = 'Your cat ran away!';
+    modalAlert.style.display = 'block';
+    navigator.vibrate(vibrDuration);
+    cat.visible = false;
+    choice = 0;
+    clearInterval(saveInterval)
+    clearInterval(decayInterval);
+    clearInterval(randomMovInterval);
+    gameEndModalShown = true;
+    getCatButton.visible = true;
+  
+  
+  //delete values and cat sprite
+
+  //stop decay and random movement values
+  //show alert
+}
+//============================================================================================================
 //modal window close buttons
-closeAlert.onclick = function () {
+document.getElementsByClassName('close')[0].onclick = function () {
   modalAlert.style.display = 'none';
 };
-closeMenu.onclick = function () {
-  modalMenu.style.display = 'none';
+document.getElementsByClassName('close')[1].onclick = function () {
+  document.getElementById('modalMenu').style.display = 'none';
 };
-closeShop.onclick = function () {
-  modalShop.style.display = 'none';
+document.getElementsByClassName('close')[2].onclick = function () {
+  document.getElementById('modalShop').style.display = 'none';
 };
-closeCat.onclick = function () {
-  modalCat.style.display = 'none';
+document.getElementsByClassName('close')[3].onclick = function () {
+  document.getElementById('modalCat').style.display = 'none';
 };
+document.getElementsByClassName('close')[4].onclick = function () {
+  document.getElementById('modalOffer').style.display = 'none';
+};
+
 //modal window open
 function menuOpen() {
-  modalMenu.style.display = 'block';
+  document.getElementById('modalMenu').style.display = 'block';
 }
 function shopOpen() {
-  modalShop.style.display = 'block';
+  document.getElementById('foodCount').innerHTML = ' x' + food;
+  document.getElementById('medicineCount').innerHTML = ' x' + medicine;
+  shopMoneyCheck();
+  document.getElementById('modalShop').style.display = 'block';
 }
 function catOpen() {
-  modalCat.style.display = 'block';
+  itemUsageCheck();
   document.getElementById('catStatText').innerHTML =
     'Hunger: ' + catHunger + '  Health: ' + catHealth;
-  //button visibility
-  if (food < 1) {
-    btnUseFood.disabled = true;
-  } else {
-    btnUseFood.disabled = false;
-  }
-  if (medicine < 1) {
-    btnUseMedicine.disabled = true;
-  } else {
-    btnUseMedicine.disabled = false;
-  }
+
+  document.getElementById('modalCat').style.display = 'block';
 }
+function offerOpen() {
+  offerMoney = 100 + (catDomestication - 79) * 10;
+  document.getElementById('offerText').innerHTML =
+    'Do want to give away your Koneko for ' + offerMoney + ' money?';
+
+    document.getElementById('modalOffer').style.display = 'block';
+}
+
 //random movement
 function randomMovement() {
   randomX = Math.floor(Math.random() * 1000);
   randomY = Math.floor(Math.random() * 400) + 200;
   moveTo.moveTo(randomX, randomY);
-  console.log(randomX, randomY);
 }
+
 //new method for decaying values
 function decayValues() {
-  //checks and decaying values
   if (catHunger !== 0) {
     isStarving = false;
   }
 
   if (isStarving == false && isGameEnd == false) {
+    //hunger
     catHunger--;
 
     if (catHunger == 0) {
       document.getElementById('modalText').innerHTML = 'Your cat is starving!';
       modalAlert.style.display = 'block';
-      navigator.vibrate(1000);
+      navigator.vibrate(vibrDuration);
       isStarving = true;
     }
     if (catHunger < 0) {
@@ -225,44 +400,45 @@ function decayValues() {
       catHunger = 100;
     }
   } else if (isStarving == true && isGameEnd == false) {
+    //health
     catHealth--;
     if (catHealth <= 0) {
       isGameEnd = true;
     }
     if (catHealth < 0) {
       catHealth = 0;
+    } else if (catHealth > 100) {
+      catHealth = 100;
     }
-  } else if (isGameEnd == true) {
-    document.getElementById('modalText').innerHTML = 'Your cat ran away!';
-    modalAlert.style.display = 'block';
-    navigator.vibrate(1000);
-    cat.setActive(false).setVisible(false);
   }
 
   //domestication checks
   if (catHunger >= 50 && catHealth >= 70) {
     catDomestication++;
+    if (catDomestication > 80) {
+      adoptionButton.visible = true;
+
+      if (!adoptionModalShown) {
+        document.getElementById('modalText').innerHTML =
+          'Hey! Your koneko is ready for adoption!';
+        modalAlert.style.display = 'block';
+        navigator.vibrate(vibrDuration);
+        adoptionModalShown = true;
+      }
+    }
   } else if (catHunger < 20 || catHealth < 40) {
     catDomestication--;
-    if (catDomestication < 0) {
+    if (catDomestication <= 0) {
+      catDomestication = 0;
       isGameEnd = true;
     }
-    if (catDomestication < 0) {
-      catDomestication = 0;
-      console.log('domestication to 0');
-    }
+  }
+  
+  if (catDomestication<=0) {
+    gameEnd();
   }
 
-  //update UI
-  statText.setText(
-    'Cat Stats:\nHealth\n' +
-      catHealth +
-      '\nHunger\n' +
-      catHunger +
-      '\nDomest\n' +
-      catDomestication +
-      '%'
-  );
+  updateUI();
 }
 
 function offscreenDecay() {
@@ -290,7 +466,7 @@ function offscreenDecay() {
       catHealth = 0;
     }
   } else if (isGameEnd == true) {
-    cat.setActive(false).setVisible(false);
+    cat.visible = false;
   }
 
   //domestication checks
@@ -298,10 +474,7 @@ function offscreenDecay() {
     catDomestication++;
   } else if (catHunger < 20 || catHealth < 40) {
     catDomestication--;
-    if (catDomestication < 0) {
-      isGameEnd = true;
-    }
-    if (catDomestication < 0) {
+    if (catDomestication <= 0) {
       catDomestication = 0;
     }
   }
@@ -310,8 +483,98 @@ function offscreenDecay() {
 function increaseMoney() {
   money++;
   expendText.setText(
-    'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
+    ' Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine + ' '
   );
+}
+//============================================================================================================
+document.getElementById('btnLogin').onclick = function () {
+  userEmail=document.getElementById("emailfield").value;
+  userPass=document.getElementById("pwfield").value;
+  if(userEmail!=account){
+    firebase.auth().signInWithEmailAndPassword(userEmail, userPass).then(function() {
+      
+      console.log("email:"+userEmail+" pw:"+userPass);
+      document.getElementById('modalMenu').style.display = 'none';
+      
+      console.log("USER LOGGED IN");
+      account=userEmail;
+      loadstate();
+      document.getElementById('modalText').innerHTML = 'Logged in as: '+account;
+      modalAlert.style.display = 'block';
+    }).catch(function(error) {
+      window.alert(error.message);
+    });
+  }
+  else{
+    modalMenu.style.display = 'none';
+    document.getElementById('modalText').innerHTML = 'Already logged in as: '+account;
+    modalAlert.style.display = 'block';
+  }
+};
+document.getElementById('btnNewUser').onclick = function () {
+  userEmail=document.getElementById("emailfield").value;
+  userPass=document.getElementById("pwfield").value;
+  firebase.auth().createUserWithEmailAndPassword(userEmail, userPass).catch(function(error) {
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    // ...
+    window.alert(errorMessage);
+  });
+  document.getElementById('modalMenu').style.display = 'none';
+};
+document.getElementById('btnClearAcc').onclick = function () {
+  firebase.auth().signOut().then(function() {
+    account="Guest";
+    loadstate();
+  }).catch(function(error) {
+    window.alert(error.message);
+  });
+  window.localStorage.removeItem(account+'-catType');
+  window.localStorage.removeItem(account+'-catHealth');
+  window.localStorage.removeItem(account+'-catHunger');
+  window.localStorage.removeItem(account+'-catDomestication');
+  window.localStorage.removeItem(account+'-money');
+  window.localStorage.removeItem(account+'-food');
+  window.localStorage.removeItem(account+'-medicine');
+  window.localStorage.removeItem(account+'-timevalue');
+  document.getElementById('modalMenu').style.display = 'none';
+  document.getElementById('modalText').innerHTML = 'Logged in as: Guest';
+  modalAlert.style.display = 'block';
+};
+document.getElementById('btnLogOut').onclick = function () {
+  firebase.auth().signOut().then(function() {
+    account="Guest";
+    loadstate();
+  document.getElementById('modalText').innerHTML = 'Logged in as: '+account;
+  modalAlert.style.display = 'block';
+  }).catch(function(error) {
+    window.alert(error.message);
+  });
+  document.getElementById('modalMenu').style.display = 'none';
+};
+//============================================================================================================
+document.getElementById('btnBuyFood').onclick = function () {
+  if (money - 20 >= 0) {
+    food = food + 1;
+    money = money - 20;
+    document.getElementById('foodCount').innerHTML = ' x' + food;
+    shopMoneyCheck();
+  }
+  updateUI();
+  var firebaseRef = firebase.database().ref();
+  firebaseRef.set("HELLO");
+};
+document.getElementById('btnBuyMedicine').onclick = function () {
+  if (money - 100 >= 0) {
+    medicine = medicine + 1;
+    money = money - 100;
+    document.getElementById('medicineCount').innerHTML = ' x' + medicine;
+    shopMoneyCheck();
+  }
+  updateUI();
+};
+function shopMoneyCheck() {
   if (money - 20 < 0) {
     document.getElementById('foodAlert').innerHTML = ' < Not enough money! >';
     document.getElementById('foodAlert').style.color = 'red';
@@ -327,106 +590,60 @@ function increaseMoney() {
   }
 }
 //============================================================================================================
-btnCreateAcc.onclick = function () {
-  //create new account, save current game and open new game for new account
-  userEmail=document.getElementById("emailfield").value;
-  userPass=document.getElementById("pwfield").value;
-  console.log("email:"+userEmail+" pw:"+userPass);
-  firebase.auth().signInWithEmailAndPassword(userEmail, userPass).catch(function(error) {
-    // Handle Errors here.
-    var errorCode = error.code;
-    var errorMessage = error.message;
-    // ...
-    window.alert(errorMessage);
-    window.alert(error.code);
-  });
-};
-btnDeleteAcc.onclick = function () {
-  //delete current account, redirect to login page
-  window.alert("test");
-};
-btnClearAcc.onclick = function () {
-  userEmail=document.getElementById("emailfield").value;
-  userPass=document.getElementById("pwfield").value;
-  firebase.auth().createUserWithEmailAndPassword(userEmail, userPass).catch(function(error) {
-    // Handle Errors here.
-    var errorCode = error.code;
-    var errorMessage = error.message;
-    // ...
-    window.alert(errorMessage);
-  });
-};
-btnLogOut.onclick = function () {
-  //save current game and redirect to login page
-  firebase.auth().signOut().then(function() {
-    account="Guest";
-    loadstate();
-  }).catch(function(error) {
-    window.alert(error.message);
-  });
-};
-//============================================================================================================
-btnBuyFood.onclick = function () {
-  if (money - 20 < 0) {
-    document.getElementById('foodAlert').innerHTML = ' Not enough money!'; //todo: refract money alert
-  } else {
-    document.getElementById('foodAlert').innerHTML = '';
-    food = food + 1;
-    money = money - 20;
-  }
-  updateUI();
-};
-btnBuyMedicine.onclick = function () {
-  if (money - 100 < 0) {
-    document.getElementById('medicineAlert').innerHTML = ' Not enough money!'; //todo: refract money alert
-  } else {
-    document.getElementById('medicineAlert').innerHTML = '';
-    medicine = medicine + 1;
-    money = money - 100;
-  }
-  updateUI();
-};
-//============================================================================================================
 btnUseFood.onclick = function () {
   food = food - 1;
   catHunger = catHunger + 10;
-  if (food < 1) {
-    btnUseFood.disabled = true;
-  } else {
-    btnUseFood.disabled = false;
+  if (catHunger > 100){
+    catHunger = 100;
   }
-  //update ui
-  document.getElementById('catStatText').innerHTML =
-    'Hunger: ' + catHunger + '  Health: ' + catHealth;
+  itemUsageCheck();
   updateUI();
 };
 btnUseMedicine.onclick = function () {
   medicine = medicine - 1;
   catHealth = catHealth + 15;
+  if (catHealth > 100){
+    catHealth = 100;
+  }
+  itemUsageCheck();
+  updateUI();
+};
+function itemUsageCheck() {
+  if (food < 1) {
+    btnUseFood.disabled = true;
+  } else {
+    btnUseFood.disabled = false;
+  }
   if (medicine < 1) {
     btnUseMedicine.disabled = true;
   } else {
     btnUseMedicine.disabled = false;
   }
-  //update ui
-  document.getElementById('catStatText').innerHTML =
-    'Hunger: ' + catHunger + '  Health: ' + catHealth;
-  updateUI();
+}
+//============================================================================================================
+document.getElementById('btnGiveAway').onclick = function () {
+  cat.visible = false;
+  money = money + offerMoney;
+  document.getElementById('modalOffer').style.display = 'none';
+  document.getElementById('modalText').innerHTML =
+    'New family of Koneko is very grateful! </br>Now is time to take care of new Koneko!';
+  modalAlert.style.display = 'block';
+  adoptionButton.visible = false;
+  getCatButton.visible = true;
+  catHealth = 0;
+  catHunger = 0;
+  catDomestication = 0;
+  clearInterval(decayInterval);
+  clearInterval(randomMovInterval);
+
+  
+};
+document.getElementById('btnKeepIt').onclick = function () {
+  document.getElementById('modalOffer').style.display = 'none';
 };
 //============================================================================================================
-//time calculation
-function getPassedTime() {
-  //get current time
-  //get last registered time
-  //calculate difference
-}
-function calculateValues() {
-  //get difference
-  //with if statements change values
-  //our changes depend on overall decay rating, good idea is to make constants
-}
-//============================================================================================================
 function savestate() {
+  window.localStorage.setItem(account+'-catType', choice);
   window.localStorage.setItem(account+'-catHealth', catHealth);
   window.localStorage.setItem(account+'-catHunger', catHunger);
   window.localStorage.setItem(account+'-catDomestication', catDomestication);
@@ -447,15 +664,18 @@ function loadstate() {
     food = 0;
     medicine = 0;
     console.log('storage is empty');
+    getCat();
     savestate();
   }
   else {
+  choice = parseInt(window.localStorage.getItem(account+'-catType'));
   catHealth = parseInt(window.localStorage.getItem(account+'-catHealth'));
   catHunger = parseInt(window.localStorage.getItem(account+'-catHunger'));
   catDomestication = parseInt(window.localStorage.getItem(account+'-catDomestication'));
   money = parseInt(window.localStorage.getItem(account+'-money'));
   food = parseInt(window.localStorage.getItem(account+'-food'));
   medicine = parseInt(window.localStorage.getItem(account+'-medicine'));
+  cat.setTexture('cat' + choice.toString(10));
   timebefore = new Date();
   timebefore.setTime(parseInt(window.localStorage.getItem(account+'-timevalue')));
   timenow = new Date();
@@ -467,6 +687,12 @@ function loadstate() {
     if (i % (decayspeed / 1000) == 0) offscreenDecay();
     if (i % (earnspeed / 1000) == 0) money++;
   }
+  updateUI();
+  if(catDomestication<=0){
+    gameEnd();
+    document.getElementById('modalText').innerHTML = 'Your cat ran away!';
+    modalAlert.style.display = 'block';
+  }
 }
 function updateUI(){
   statText.setText(
@@ -474,7 +700,7 @@ function updateUI(){
       catHealth +
       '\nHunger\n' +
       catHunger +
-      '\nDomest\n' +
+      '\nDomestication\n' +
       catDomestication +
       '%'
   );
@@ -482,20 +708,3 @@ function updateUI(){
     'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
   );
 }
-
-function createUser(){
-}
-function cloudsave(){
-//   //var userEmail=document.getElementById("emailfield").nodeValue;
-}
-firebase.auth().onAuthStateChanged(function(user){
-  if(user){
-    account=userEmail;
-    loadstate();
-    console.log(userEmail);
-  }
-  else{
-    account="Guest";
-    loadstate();
-  }
-});
