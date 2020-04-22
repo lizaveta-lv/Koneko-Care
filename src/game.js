@@ -84,6 +84,8 @@ export function startGame() {
 //loading from storage
 var timenow, timebefore, timediff;
 var account="Guest";
+var userEmail,userPass;
+let loginerror=0;
 window.localStorage.clear(); //use this to reset stats
 if (window.localStorage.getItem(account+'-catHealth') == null) {
   //default values
@@ -312,14 +314,14 @@ function increaseMoney() {
     'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
   );
   if (money - 20 < 0) {
-    document.getElementById('foodAlert').innerHTML = ' < Not enough money! >';
+    document.getElementById('foodAlert').innerHTML = ' (Not enough money!) ';
     document.getElementById('foodAlert').style.color = 'red';
   } else {
     document.getElementById('foodAlert').innerHTML = '';
   }
   if (money - 100 < 0) {
     document.getElementById('medicineAlert').innerHTML =
-      ' < Not enough money! >';
+      ' (Not enough money!) ';
     document.getElementById('medicineAlert').style.color = 'red';
   } else {
     document.getElementById('medicineAlert').innerHTML = '';
@@ -328,17 +330,45 @@ function increaseMoney() {
 //============================================================================================================
 btnCreateAcc.onclick = function () {
   //create new account, save current game and open new game for new account
-  login();
+  userEmail=document.getElementById("emailfield").value;
+  userPass=document.getElementById("pwfield").value;
+  console.log("attempted login by "+userEmail);
+  firebase.auth().signInWithEmailAndPassword(userEmail, userPass).catch(function(error) {
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    // ...
+    window.alert(errorMessage);
+    window.alert(error.code);
+    loginerror=1;
+  });
+  if (loginerror == 0){
+    account=userEmail;
+    loadstate();
+    console.log(userEmail);
+    updateUI();
+  }
 };
 btnDeleteAcc.onclick = function () {
   //delete current account, redirect to login page
-  window.alert("test");
 };
 btnClearAcc.onclick = function () {
-  //clear storage of current account
+  firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    // ...
+    window.alert(errorMessage);
+  });
 };
 btnLogOut.onclick = function () {
   //save current game and redirect to login page
+  firebase.auth().signOut().then(function() {
+    account="Guest";
+    loadstate();
+  }).catch(function(error) {
+    window.alert(error.message);
+  });
 };
 //============================================================================================================
 btnBuyFood.onclick = function () {
@@ -413,6 +443,18 @@ function savestate() {
   console.log('saving for '+account);
 }
 function loadstate() {
+  if (window.localStorage.getItem(account+'-catHealth') == null) {
+    //default values
+    catHealth = 100;
+    catHunger = 100;
+    catDomestication = 0;
+    money = 200;
+    food = 0;
+    medicine = 0;
+    console.log('storage is empty');
+    savestate();
+  }
+  else {
   catHealth = parseInt(window.localStorage.getItem(account+'-catHealth'));
   catHunger = parseInt(window.localStorage.getItem(account+'-catHunger'));
   catDomestication = parseInt(window.localStorage.getItem(account+'-catDomestication'));
@@ -425,6 +467,7 @@ function loadstate() {
   timediff = timenow - timebefore;
   timediff /= 1000;
   console.log(timediff + ' seconds since last login by '+account);
+  }
   for (var i = 0; i < timediff; i++) {
     if (i % (decayspeed / 1000) == 0) offscreenDecay();
     if (i % (earnspeed / 1000) == 0) money++;
@@ -445,20 +488,8 @@ function updateUI(){
   );
 }
 
-function login(){
-  // var userEmail=document.getElementById("emailfield").nodeValue;
-  // var userPass=document.getElementById("pwfield").nodeValue;
-  // console.log("email:"+userEmail+" pw:"+userPass);
-  
-}
 function createUser(){
 }
 function cloudsave(){
 //   //var userEmail=document.getElementById("emailfield").nodeValue;
-// }
-// firebase.auth().onAuthStateChanged(function(user)){
-//   if(user){
-
-//   }
-//   else{}
 }
