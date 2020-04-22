@@ -201,17 +201,25 @@ function create() {
     }
   });
   cat.setInteractive({ useHandCursor: true }).on('pointerup', () => catOpen());
+  
 }
-
 
 //TODO, dubble tap event
 const onShake = function() {
   console.log('onShake event received');
-  for (let i = -180; i < 180; i++){
-    cat.rotation = i;
+  if (cat.rotation == 0){
+    cat.rotation = 140;
   }
   navigator.vibrate(vibrDuration);
 }
+
+if (typeof shake!=="undefined") {
+  // only available on device
+  console.log('attaching onShake event handler');
+  shake.startWatch(onShake, 40);
+}
+
+
 
 //============================================================================================================
 function getCat(){
