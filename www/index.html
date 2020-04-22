@@ -34,12 +34,11 @@
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <link rel="stylesheet" type="text/css" href="css/index.css">
-        <title>Hello World</title>
+        <title>Koneko Care</title>
     </head>
     <body>
         <div id="modalAlert" class="modal">
 
-            <!-- Modal content -->
             <div class="modal-content">
               <span class="close">&times;</span>
               <p id="modalText">Some text in the Modal..</p>
@@ -62,10 +61,10 @@
         <div id="modalShop" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <p>Food (restores 10 hunger)<span id="foodAlert"></span></br>
+                <p>Food<span id="foodCount"></span> </br>(restores 10 hunger)<span id="foodAlert"></span></br>
                     Cost: 20 $ <button id="btnBuyFood">Buy</button>
                 </p>
-                <p>Medicine (restores 15 health)<span id="medicineAlert"></span></br>
+                <p>Medicine<span id="medicineCount"></span> </br>(restores 15 health)<span id="medicineAlert"></span></br>
                     Cost: 100 $ <button id="btnBuyMedicine">Buy</button>
                 </p>
             </div>
@@ -95,6 +94,24 @@
 
             </div>
             
+        </div>
+        <div id="modalGetCat" class="modal">
+            <div class="modal-content">
+                <p id="catChoise1" class="choise">
+                    <img src="img/cat1.png">
+                    <span id="catDomest1"></span>
+                </p></br>
+                <p id="catChoise2" class="choise">
+                    <img src="img/cat2.png">
+                    <span id="catDomest2"></span>
+                </p></br>
+                <p id="catChoise3" class="choise"> 
+                    <img src="img/cat3.png">
+                    <span id="catDomest3"></span>
+                </p></br>
+                <span id="choiseAlert" class="hidden">You must choose!</span>
+                <button id="btnChoise">Get Koneko</button>
+            </div>
         </div>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="index.bundle.js"></script>

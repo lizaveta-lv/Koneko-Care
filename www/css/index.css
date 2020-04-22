@@ -3,13 +3,17 @@
 }
 * {
 	margin: 0;
-	padding: 0;
+  padding: 0;
+  font-size: 40;
+  background-color: aqua;
 }
+
+
 /* The Modal (background) */
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    z-index: 2; /* Sit on top */
     padding: 100px;/* Location of the box */
     left: 0;
     top: 0;
@@ -26,8 +30,10 @@
     margin: auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 300px;
-    height: 100px;
+  }
+
+  .modal-content p, .modal-content span {
+    background-color: #fefefe;
   }
   
   /* The Close Button */
@@ -36,6 +42,28 @@
     float: right;
     font-size: 28px;
     font-weight: bold;
+  }
+  .hidden {
+    display: none;
+  }
+
+  button {
+  background:linear-gradient(to bottom, #ebbfbf 5%, #f09e9e 100%);
+	background-color:#ebbfbf;
+	border-radius:28px;
+	border:1px solid #e86f6f;
+	display:inline-block;
+	cursor:pointer;
+	color:#5e3a3a;
+	font-family:Arial;
+	font-size:17px;
+	padding:16px 31px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #1a0b0b;
+  }
+  button:disabled {
+    background:linear-gradient(to bottom, #e6e6e6 5%, #c4bcbc 100%);
+	  background-color:#e6e6e6;
   }
 
 /* Landscape layout (with min-width) */

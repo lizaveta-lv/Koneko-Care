@@ -15,7 +15,9 @@
     "cordova-android": "^8.1.0",
     "cordova-browser": "^6.0.0",
     "cordova-plugin-console": "^1.1.0",
+    "cordova-plugin-device-motion": "^2.0.1",
     "cordova-plugin-screen-orientation": "^3.0.2",
+    "cordova-plugin-shake": "^0.7.0",
     "cordova-plugin-vibration": "^3.1.1",
     "cordova-plugin-webpack": "^1.0.2",
     "es6-promise-plugin": "^4.2.2",
@@ -36,7 +38,8 @@
       "cordova-plugin-console": {},
       "cordova-plugin-webpack": {},
       "cordova-plugin-screen-orientation": {},
-      "cordova-plugin-vibration": {}
+      "cordova-plugin-vibration": {},
+      "cordova-plugin-shake": {}
     },
     "platforms": [
       "android",

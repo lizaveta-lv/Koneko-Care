@@ -6,6 +6,7 @@ dist/
 /platforms
 /plugins
 index.bundle.js
+.idea
 
 # wepack adds transpiled images directly into www folder
 www/*.png
