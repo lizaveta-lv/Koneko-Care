@@ -28,11 +28,13 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' blob: data:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self' http://* https://* 'unsafe-inline' 'unsafe-eval'; style-src 'self' http://* 'unsafe-inline'; media-src *; img-src 'self' blob: data:;">
+        
         <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *"> -->
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        
         <link rel="stylesheet" type="text/css" href="css/index.css">
         <title>Hello World</title>
     </head>
@@ -50,6 +52,8 @@
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <p>
+                    <input placeholder="Email" id="emailfield" type="email">
+                    <input placeholder="Password" id="pwfield" type="password">
                     <button id="btnCreateAcc">Create Account</button></br>
                     <button id="btnDeleteAcc">Delete Account</button></br>
                     <button id="btnClearAcc">Clear Account</button></br>
@@ -84,7 +88,35 @@
             </div>
 
         </div>
+
+        
+        <!-- The core Firebase JS SDK is always required and must be listed first -->
+        <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+
+        <!-- TODO: Add SDKs for Firebase products that you want to use
+            https://firebase.google.com/docs/web/setup#available-libraries -->
+        <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-auth.js"></script>
+
+        <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCgFizKQmHV46yuZF9cOxxiYkxSSpWVYfw",
+            authDomain: "konekokare.firebaseapp.com",
+            databaseURL: "https://konekokare.firebaseio.com",
+            projectId: "konekokare",
+            storageBucket: "konekokare.appspot.com",
+            messagingSenderId: "781260204085",
+            appId: "1:781260204085:web:b9b7c7bba7c20b8bcfa97c",
+            measurementId: "G-5F01LW8XK2"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        </script>
+        
+
+        
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="index.bundle.js"></script>
+        
     </body>
 </html>
