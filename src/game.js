@@ -84,8 +84,7 @@ export function startGame() {
 //loading from storage
 var timenow, timebefore, timediff;
 var account="Guest";
-var userEmail,userPass;
-let loginerror=0;
+var userEmail="Guest",userPass;
 window.localStorage.clear(); //use this to reset stats
 if (window.localStorage.getItem(account+'-catHealth') == null) {
   //default values
@@ -314,14 +313,14 @@ function increaseMoney() {
     'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
   );
   if (money - 20 < 0) {
-    document.getElementById('foodAlert').innerHTML = ' (Not enough money!) ';
+    document.getElementById('foodAlert').innerHTML = ' < Not enough money! >';
     document.getElementById('foodAlert').style.color = 'red';
   } else {
     document.getElementById('foodAlert').innerHTML = '';
   }
   if (money - 100 < 0) {
     document.getElementById('medicineAlert').innerHTML =
-      ' (Not enough money!) ';
+      ' < Not enough money! >';
     document.getElementById('medicineAlert').style.color = 'red';
   } else {
     document.getElementById('medicineAlert').innerHTML = '';
@@ -332,7 +331,7 @@ btnCreateAcc.onclick = function () {
   //create new account, save current game and open new game for new account
   userEmail=document.getElementById("emailfield").value;
   userPass=document.getElementById("pwfield").value;
-  console.log("attempted login by "+userEmail);
+  console.log("email:"+userEmail+" pw:"+userPass);
   firebase.auth().signInWithEmailAndPassword(userEmail, userPass).catch(function(error) {
     // Handle Errors here.
     var errorCode = error.code;
@@ -340,20 +339,16 @@ btnCreateAcc.onclick = function () {
     // ...
     window.alert(errorMessage);
     window.alert(error.code);
-    loginerror=1;
   });
-  if (loginerror == 0){
-    account=userEmail;
-    loadstate();
-    console.log(userEmail);
-    updateUI();
-  }
 };
 btnDeleteAcc.onclick = function () {
   //delete current account, redirect to login page
+  window.alert("test");
 };
 btnClearAcc.onclick = function () {
-  firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
+  userEmail=document.getElementById("emailfield").value;
+  userPass=document.getElementById("pwfield").value;
+  firebase.auth().createUserWithEmailAndPassword(userEmail, userPass).catch(function(error) {
     // Handle Errors here.
     var errorCode = error.code;
     var errorMessage = error.message;
@@ -493,3 +488,14 @@ function createUser(){
 function cloudsave(){
 //   //var userEmail=document.getElementById("emailfield").nodeValue;
 }
+firebase.auth().onAuthStateChanged(function(user){
+  if(user){
+    account=userEmail;
+    loadstate();
+    console.log(userEmail);
+  }
+  else{
+    account="Guest";
+    loadstate();
+  }
+});
