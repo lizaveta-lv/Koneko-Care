@@ -82,7 +82,7 @@ export function startGame() {
 }
 
 //loading from storage
-//window.localStorage.clear(); //use this to reset stats
+window.localStorage.clear(); //use this to reset stats
 if (window.localStorage.getItem('catHealth') == null) {
   //default values
   catHealth = 100;
@@ -97,7 +97,6 @@ if (window.localStorage.getItem('catHealth') == null) {
 } else {
   loadstate();
   console.log('info being loaded');
-  console.log("after load state:", catHealth, catHunger, catDomestication, money, food, medicine, choise);
 }
 
 function preload() {
@@ -128,26 +127,31 @@ function create() {
 
   let textStyle = {
     fontSize: '40px',
-    fill: '#000',
-    align: 'right'
+    fill: '#fff',
+    align: 'center',
+    backgroundColor: '#fca89f',
+    fontWeight: 'bold',
+    fontFamily: 'Comic Neue'
+
+
   }
   //UI
-  statText = this.add.text(950, 16, 'Cat Stats', textStyle);
-  expendText = this.add.text(16, 680, 'Money \nFood \nMedicine', textStyle);
+  statText = this.add.text(1020, 16, 'Cat Stats', textStyle);
+  expendText = this.add.text(16, 670, ' Money \nFood \nMedicine ', textStyle);
   menuButton = this.add
-    .text(16, 16, 'Menu', textStyle)
+    .text(16, 16, ' Menu ', textStyle)
     .setInteractive()
     .on('pointerup', () => menuOpen());
   shopButton = this.add
-    .text(16, 100, 'Shop', textStyle)
+    .text(16, 100, ' Shop ', textStyle)
     .setInteractive()
     .on('pointerup', () => shopOpen());
   adoptionButton = this.add
-    .text(500, 16, 'Adoption \nOffer', textStyle)
+    .text(500, 16, ' Adoption \n Offer ', textStyle)
     .setInteractive()
     .on('pointerup', () => offerOpen());
   adoptionButton.visible = false;
-  getCatButton = this.add.text(800, 680, 'Get new Koneko', textStyle).setInteractive()
+  getCatButton = this.add.text(800, 670, ' Get Koneko ', textStyle).setInteractive()
   .on('pointerup', () => getCat());
   getCatButton.visible = false;
 
@@ -162,7 +166,7 @@ function create() {
       '%'
   );
   expendText.setText(
-    'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
+    ' Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine + ' '
   );
 
   //start intervals
@@ -171,15 +175,17 @@ function create() {
   console.log('autosave begins');
   setInterval(savestate, 1000);
 
-  cat = this.add.sprite(1000, 600, 'cat1');
+  cat = this.add.sprite(640, 360, 'cat1');
+
   cat.setScale(2);
   cat.visible = false;
-  if (choise = 0){
+  if (choise == 0){
     getCat();
   }else if (choise >= 1 && choise <= 3){
     cat.setTexture('cat' + choise.toString(10));
     cat.visible = true;
   }
+
   
   decayInterval = setInterval(decayValues, decayspeed);
   randomMovInterval = setInterval(randomMovement, 8000);
@@ -198,6 +204,7 @@ function create() {
 }
 
 
+//TODO, dubble tap event
 const onShake = function() {
   console.log('onShake event received');
   for (let i = -180; i < 180; i++){
@@ -206,16 +213,9 @@ const onShake = function() {
   navigator.vibrate(vibrDuration);
 }
 
-if (typeof shake!=="undefined") {
-  // only available on device
-  console.log('attaching onShake event handler');
-  shake.startWatch(onShake, 40);
-}
-
-
-
 //============================================================================================================
 function getCat(){
+  console.log("get cat called");
   domestication1 = Math.floor(Math.random() * 12);
   domestication2 = Math.floor(Math.random() * 12);
   domestication3 = Math.floor(Math.random() * 12);
@@ -279,6 +279,7 @@ document.getElementById('btnChoise').onclick = function () {
         catDomestication = 0;
     };
 
+    
     getCatButton.visible= false;
     catHealth = 100;
     catHunger = 100;
@@ -476,7 +477,7 @@ function offscreenDecay() {
 function increaseMoney() {
   money++;
   expendText.setText(
-    'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
+    ' Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine + ' '
   );
 }
 //============================================================================================================
@@ -503,8 +504,8 @@ document.getElementById('btnBuyFood').onclick = function () {
 };
 document.getElementById('btnBuyMedicine').onclick = function () {
   if (money - 100 >= 0) {
-    food = food + 1;
-    money = money - 20;
+    medicine = medicine + 1;
+    money = money - 100;
     document.getElementById('medicineCount').innerHTML = ' x' + medicine;
     shopMoneyCheck();
   }
@@ -567,8 +568,15 @@ document.getElementById('btnGiveAway').onclick = function () {
   document.getElementById('modalText').innerHTML =
     'New family of Koneko is very grateful! </br>Now is time to take care of new Koneko!';
   modalAlert.style.display = 'block';
-  getCatButton.visible = true;
   adoptionButton.visible = false;
+  getCatButton.visible = true;
+  catHealth = 0;
+  catHunger = 0;
+  catDomestication = 0;
+  clearInterval(decayInterval);
+  clearInterval(randomMovInterval);
+
+  
 };
 document.getElementById('btnKeepIt').onclick = function () {
   document.getElementById('modalOffer').style.display = 'none';
