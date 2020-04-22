@@ -168,6 +168,17 @@ function create() {
     ' Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine + ' '
   );
 
+  
+  function onPause() {
+    audioGame.pause();
+  }
+  function onResume() {
+    audioGame.play();
+  }
+
+  document.addEventListener("pause", onPause, false);
+  document.addEventListener("resume", onResume, false);
+
   //start intervals
   
   setInterval(increaseMoney, earnspeed);
@@ -688,6 +699,9 @@ function loadstate() {
   updateUI();
 }
 function updateUI(){
+  document.getElementById('catStatText').innerHTML =
+    'Hunger: ' + catHunger + '  Health: ' + catHealth;
+
   statText.setText(
     'Cat Stats:\nHealth\n' +
       catHealth +
