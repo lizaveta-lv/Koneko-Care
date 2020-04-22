@@ -74,7 +74,6 @@ let gameEndModalShown = false;
 //
 const vibrDuration = 200;
 
-let shake;
 
 //============================================================================================================
 export function startGame() {
@@ -198,14 +197,22 @@ function create() {
   cat.setInteractive({ useHandCursor: true }).on('pointerup', () => catOpen());
 }
 
-function update() {}
 
-let onShake = function() {
+const onShake = function() {
+  console.log('onShake event received');
   for (let i = -180; i < 180; i++){
     cat.rotation = i;
   }
   navigator.vibrate(vibrDuration);
 }
+
+if (typeof shake!=="undefined") {
+  // only available on device
+  console.log('attaching onShake event handler');
+  shake.startWatch(onShake, 40);
+}
+
+
 
 //============================================================================================================
 function getCat(){
