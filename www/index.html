@@ -62,10 +62,10 @@
         <div id="modalShop" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <p>Food<span id="foodAlert"></span></br>
+                <p>Food (restores 10 hunger)<span id="foodAlert"></span></br>
                     Cost: 20 $ <button id="btnBuyFood">Buy</button>
                 </p>
-                <p>Medicine<span id="medicineAlert"></span></br>
+                <p>Medicine (restores 15 health)<span id="medicineAlert"></span></br>
                     Cost: 100 $ <button id="btnBuyMedicine">Buy</button>
                 </p>
             </div>
@@ -83,6 +83,18 @@
 
             </div>
 
+        </div>
+        <div id="modalOffer" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <p>
+                    <span id="offerText">Text</span></br>
+                    <button id="btnKeepIt">Keep it</button>
+                    <button id="btnGiveAway">Give away</button>
+                </p>
+
+            </div>
+            
         </div>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="index.bundle.js"></script>
