@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
 import MoveTo from 'phaser3-rex-plugins/plugins/moveto.js';
 
+import groundImg from '../www/img/back.png' 
+import catImg from '../www/img/cat.png'
+
+
 const loaderSceneConfig = {
   key: 'loader',
   active: true,
@@ -11,15 +15,13 @@ const loaderSceneConfig = {
 const config = {
   type: Phaser.AUTO,
   parent: 'phaser-example',
-  width: 1000,
-  height: 600,
-  physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { y: 200 },
-    },
-  },
+  width: 1280,
+  height: 720,
   scene: [loaderSceneConfig],
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+},
 };
 //============================================================================================================
 //modal windows
@@ -45,12 +47,11 @@ let btnUseFood = document.getElementById('btnUseFood');
 let btnUseMedicine = document.getElementById('btnUseMedicine');
 //sprites
 let ground;
-let walls;
 let cat;
 //decaying stats
 let isStarving = new Boolean(false);
 let isGameEnd = new Boolean(false);
-let catHealth; 
+let catHealth;
 let catHunger;
 let catDomestication;
 //expendables
@@ -63,7 +64,8 @@ let expendText;
 let menuButton;
 let shopButton;
 //decaying intervals
-var decayspeed=3000,earnspeed=1000;
+var decayspeed = 3000,
+  earnspeed = 1000;
 let increaseMoneyInterval;
 let decreaseValuesInterval;
 //storage
@@ -76,12 +78,14 @@ let randomY;
 //============================================================================================================
 export function startGame() {
   const game = new Phaser.Game(config);
+  screen.orientation.lock('landscape');
 }
 
 //loading from storage
-var timenow,timebefore,timediff;
+var timenow, timebefore, timediff;
+var account="Guest";
 window.localStorage.clear(); //use this to reset stats
-if (window.localStorage.getItem('catHealth') == null) {
+if (window.localStorage.getItem(account+'-catHealth') == null) {
   //default values
   catHealth = 100;
   catHunger = 100;
@@ -97,33 +101,30 @@ if (window.localStorage.getItem('catHealth') == null) {
 }
 function preload() {
   //load sprites
-  this.load.image('ground', '/img/back.png');
-  this.load.image('cat', '/img/cat.png');
-  this.load.image('walls', '/img/walls.png');
+  this.load.image('ground', groundImg);
+  this.load.image('cat', catImg);
 }
 function create() {
   //add background sprites
-  ground = this.add.sprite(500, 300, 'ground');
-  walls = this.add.sprite(500, 300, 'walls');
-
+  ground = this.add.sprite(640, 360, 'ground');
   //UI
-  statText = this.add.text(830, 16, 'Cat Stats', {
+  statText = this.add.text(1100, 16, 'Cat Stats', {
     fontSize: '24px',
     fill: '#000',
   });
-  expendText = this.add.text(16, 570, 'Money \nFood \nMedicine', {
+  expendText = this.add.text(16, 680, 'Money \nFood \nMedicine', {
     fontSize: '24px',
     fill: '#000',
   });
   menuButton = this.add
-    .text(910, 570, 'Menu', {
+    .text(16, 16, 'Menu', {
       fontSize: '24px',
       fill: '#000',
     })
     .setInteractive()
     .on('pointerup', () => menuOpen());
   shopButton = this.add
-    .text(16, 16, 'Shop', {
+    .text(16, 50, 'Shop', {
       fontSize: '24px',
       fill: '#000',
     })
@@ -155,8 +156,8 @@ function create() {
 }
 
 function update() {
-  this.physics.arcade.collide(cat, walls);
 }
+
 //============================================================================================================
 //modal window close buttons
 closeAlert.onclick = function () {
@@ -214,6 +215,7 @@ function decayValues() {
     if (catHunger == 0) {
       document.getElementById('modalText').innerHTML = 'Your cat is starving!';
       modalAlert.style.display = 'block';
+      navigator.vibrate(1000);
       isStarving = true;
     }
     if (catHunger < 0) {
@@ -232,6 +234,7 @@ function decayValues() {
   } else if (isGameEnd == true) {
     document.getElementById('modalText').innerHTML = 'Your cat ran away!';
     modalAlert.style.display = 'block';
+    navigator.vibrate(1000);
     cat.setActive(false).setVisible(false);
   }
 
@@ -261,7 +264,7 @@ function decayValues() {
   );
 }
 
-function offscreenDecay(){
+function offscreenDecay() {
   if (catHunger !== 0) {
     isStarving = false;
   }
@@ -301,8 +304,6 @@ function offscreenDecay(){
       catDomestication = 0;
     }
   }
-
-
 }
 
 function increaseMoney() {
@@ -327,9 +328,11 @@ function increaseMoney() {
 //============================================================================================================
 btnCreateAcc.onclick = function () {
   //create new account, save current game and open new game for new account
+  login();
 };
 btnDeleteAcc.onclick = function () {
   //delete current account, redirect to login page
+  window.alert("test");
 };
 btnClearAcc.onclick = function () {
   //clear storage of current account
@@ -346,6 +349,7 @@ btnBuyFood.onclick = function () {
     food = food + 1;
     money = money - 20;
   }
+  updateUI();
 };
 btnBuyMedicine.onclick = function () {
   if (money - 100 < 0) {
@@ -355,6 +359,7 @@ btnBuyMedicine.onclick = function () {
     medicine = medicine + 1;
     money = money - 100;
   }
+  updateUI();
 };
 //============================================================================================================
 btnUseFood.onclick = function () {
@@ -368,6 +373,7 @@ btnUseFood.onclick = function () {
   //update ui
   document.getElementById('catStatText').innerHTML =
     'Hunger: ' + catHunger + '  Health: ' + catHealth;
+  updateUI();
 };
 btnUseMedicine.onclick = function () {
   medicine = medicine - 1;
@@ -380,6 +386,7 @@ btnUseMedicine.onclick = function () {
   //update ui
   document.getElementById('catStatText').innerHTML =
     'Hunger: ' + catHunger + '  Health: ' + catHealth;
+  updateUI();
 };
 //============================================================================================================
 //time calculation
@@ -395,33 +402,63 @@ function calculateValues() {
 }
 //============================================================================================================
 function savestate() {
-  window.localStorage.setItem('catHealth', catHealth);
-  window.localStorage.setItem('catHunger', catHunger);
-  window.localStorage.setItem('catDomestication', catDomestication);
-  window.localStorage.setItem('money', money);
-  window.localStorage.setItem('food', food);
-  window.localStorage.setItem('medicine', medicine);
-  timebefore=new Date();
-  window.localStorage.setItem('timevalue', timebefore.getTime());
-  console.log('saving...');
+  window.localStorage.setItem(account+'-catHealth', catHealth);
+  window.localStorage.setItem(account+'-catHunger', catHunger);
+  window.localStorage.setItem(account+'-catDomestication', catDomestication);
+  window.localStorage.setItem(account+'-money', money);
+  window.localStorage.setItem(account+'-food', food);
+  window.localStorage.setItem(account+'-medicine', medicine);
+  timebefore = new Date();
+  window.localStorage.setItem(account+'-timevalue', timebefore.getTime());
+  console.log('saving for '+account);
 }
 function loadstate() {
-  catHealth = parseInt(window.localStorage.getItem('catHealth'));
-  catHunger = parseInt(window.localStorage.getItem('catHunger'));
-  catDomestication = parseInt(window.localStorage.getItem('catDomestication'));
-  money = parseInt(window.localStorage.getItem('money'));
-  food = parseInt(window.localStorage.getItem('food'));
-  medicine = parseInt(window.localStorage.getItem('medicine'));
+  catHealth = parseInt(window.localStorage.getItem(account+'-catHealth'));
+  catHunger = parseInt(window.localStorage.getItem(account+'-catHunger'));
+  catDomestication = parseInt(window.localStorage.getItem(account+'-catDomestication'));
+  money = parseInt(window.localStorage.getItem(account+'-money'));
+  food = parseInt(window.localStorage.getItem(account+'-food'));
+  medicine = parseInt(window.localStorage.getItem(account+'-medicine'));
   timebefore = new Date();
-  timebefore.setTime(parseInt(window.localStorage.getItem('timevalue')));
+  timebefore.setTime(parseInt(window.localStorage.getItem(account+'-timevalue')));
   timenow = new Date();
   timediff = timenow - timebefore;
   timediff /= 1000;
-  console.log(timediff+" seconds since last opened");
-  for(var i=0;i<timediff;i++){
-    if(i%(decayspeed/1000)==0)
-      offscreenDecay();
-    if(i%(earnspeed/1000)==0)
-      money++;
+  console.log(timediff + ' seconds since last login by '+account);
+  for (var i = 0; i < timediff; i++) {
+    if (i % (decayspeed / 1000) == 0) offscreenDecay();
+    if (i % (earnspeed / 1000) == 0) money++;
   }
+}
+function updateUI(){
+  statText.setText(
+    'Cat Stats:\nHealth\n' +
+      catHealth +
+      '\nHunger\n' +
+      catHunger +
+      '\nDomest\n' +
+      catDomestication +
+      '%'
+  );
+  expendText.setText(
+    'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
+  );
+}
+
+function login(){
+  var userEmail=document.getElementById("emailfield").nodeValue;
+  var userPass=document.getElementById("pwfield").nodeValue;
+  console.log("email:"+userEmail+" pw:"+userPass);
+  
+}
+function createUser(){
+}
+function cloudsave(){
+  //var userEmail=document.getElementById("emailfield").nodeValue;
+}
+firebase.auth().onAuthStateChanged(function(user)){
+  if(user){
+
+  }
+  else{}
 }
