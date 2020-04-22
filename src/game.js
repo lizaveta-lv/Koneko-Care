@@ -73,8 +73,7 @@ let adoptionModalShown = false;
 let gameEndModalShown = false;
 //
 const vibrDuration = 200;
-
-let shake;
+let audioGame;
 
 //============================================================================================================
 export function startGame() {
@@ -136,9 +135,11 @@ function create() {
     backgroundColor: '#fca89f',
     fontWeight: 'bold',
     fontFamily: 'Comic Neue'
-
-
   }
+  audioGame = document.getElementById('theme');
+  audioGame.loop = true;
+  audioGame.volume = 0.2;
+  audioGame.play();
   //UI
   statText = this.add.text(1020, 16, 'Cat Stats', textStyle);
   expendText = this.add.text(16, 670, ' Money \nFood \nMedicine ', textStyle);
@@ -181,7 +182,7 @@ function create() {
 
   cat = this.add.sprite(640, 360, 'cat1');
 
-  cat.setScale(2);
+  cat.setScale(1.5);
   cat.visible = false;
   if (choice == 0){
     getCat();
@@ -208,16 +209,18 @@ function create() {
   
 }
 
-function update() {}
 //TODO, dubble tap event
 const onShake = function() {
   console.log('onShake event received');
   if (cat.rotation == 0){
-    cat.rotation = 140;
+    cat.rotation = 3;
+    moveTo.setSpeed(0);
+  }else{
+    cat.rotation = 0;
+    moveTo.setSpeed(100);
   }
   navigator.vibrate(vibrDuration);
 }
-
 if (typeof shake!=="undefined") {
   // only available on device
   console.log('attaching onShake event handler');
@@ -329,31 +332,40 @@ function gameEnd(){
 //modal window close buttons
 document.getElementsByClassName('close')[0].onclick = function () {
   modalAlert.style.display = 'none';
+  cat.setInteractive();
 };
 document.getElementsByClassName('close')[1].onclick = function () {
   document.getElementById('modalMenu').style.display = 'none';
+  cat.setInteractive();
 };
 document.getElementsByClassName('close')[2].onclick = function () {
   document.getElementById('modalShop').style.display = 'none';
+  cat.setInteractive();
 };
 document.getElementsByClassName('close')[3].onclick = function () {
   document.getElementById('modalCat').style.display = 'none';
+  cat.setInteractive();
 };
 document.getElementsByClassName('close')[4].onclick = function () {
   document.getElementById('modalOffer').style.display = 'none';
+  cat.setInteractive();
 };
 
 //modal window open
 function menuOpen() {
+  cat.disableInteractive();
   document.getElementById('modalMenu').style.display = 'block';
+  
 }
 function shopOpen() {
+  cat.disableInteractive();
   document.getElementById('foodCount').innerHTML = ' x' + food;
   document.getElementById('medicineCount').innerHTML = ' x' + medicine;
   shopMoneyCheck();
   document.getElementById('modalShop').style.display = 'block';
 }
 function catOpen() {
+  cat.disableInteractive();
   itemUsageCheck();
   document.getElementById('catStatText').innerHTML =
     'Hunger: ' + catHunger + '  Health: ' + catHealth;
@@ -361,6 +373,7 @@ function catOpen() {
   document.getElementById('modalCat').style.display = 'block';
 }
 function offerOpen() {
+  cat.disableInteractive();
   offerMoney = 100 + (catDomestication - 79) * 10;
   document.getElementById('offerText').innerHTML =
     'Do want to give away your Koneko for ' + offerMoney + ' money?';

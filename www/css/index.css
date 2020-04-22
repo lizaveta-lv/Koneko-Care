@@ -8,7 +8,9 @@
   font-family: 'Comic Neue';
   background-color: #ffd8d4;
 }
-
+audio {
+  display: none;
+}
 
 /* The Modal (background) */
 .modal {
