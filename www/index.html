@@ -28,7 +28,8 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' blob: data:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self' http://* https://* 'unsafe-inline' 'unsafe-eval'; style-src 'self' http://* 'unsafe-inline'; media-src *; img-src 'self' blob: data:;">
+        <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' blob: data:;"> -->
         <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *"> -->
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
@@ -49,10 +50,14 @@
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <p>
-                    <button id="btnCreateAcc">Create Account</button>
-                    <button id="btnDeleteAcc">Delete Account</button>
-                    <button id="btnClearAcc">Clear Account</button>
-                    <button id="btnLogOut">Log Out</button>
+                    <input placeholder="Email" id="emailfield" type="email">
+                    <input placeholder="Password" id="pwfield" type="password">
+                    <p>
+                    <button id="btnLogin">Login</button></br>
+                    <button id="btnNewUser">New User</button></br>
+                    <button id="btnClearAcc">Delete User</button></br>
+                    <button id="btnLogOut">Log Out</button></br>
+                    </p>
                 </p>
 
             </div>
@@ -97,22 +102,46 @@
         </div>
         <div id="modalGetCat" class="modal">
             <div class="modal-content">
-                <p id="catChoise1" class="choise">
+                <p id="catChoice1" class="choice">
                     <img src="img/cat1.png">
                     <span id="catDomest1"></span>
                 </p></br>
-                <p id="catChoise2" class="choise">
+                <p id="catChoice2" class="choice">
                     <img src="img/cat2.png">
                     <span id="catDomest2"></span>
                 </p></br>
-                <p id="catChoise3" class="choise"> 
+                <p id="catChoice3" class="choice"> 
                     <img src="img/cat3.png">
                     <span id="catDomest3"></span>
                 </p></br>
-                <span id="choiseAlert" class="hidden">You must choose!</span>
-                <button id="btnChoise">Get Koneko</button>
+                <span id="choiceAlert" class="hidden">You must choose!</span>
+                <button id="btnChoice">Get Koneko</button>
             </div>
         </div>
+
+        <!-- The core Firebase JS SDK is always required and must be listed first -->
+        <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+
+        <!-- TODO: Add SDKs for Firebase products that you want to use
+            https://firebase.google.com/docs/web/setup#available-libraries -->
+        <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-auth.js"></script>
+
+        <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCgFizKQmHV46yuZF9cOxxiYkxSSpWVYfw",
+            authDomain: "konekokare.firebaseapp.com",
+            databaseURL: "https://konekokare.firebaseio.com",
+            projectId: "konekokare",
+            storageBucket: "konekokare.appspot.com",
+            messagingSenderId: "781260204085",
+            appId: "1:781260204085:web:b9b7c7bba7c20b8bcfa97c",
+            measurementId: "G-5F01LW8XK2"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        </script>
+
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="index.bundle.js"></script>
     </body>
