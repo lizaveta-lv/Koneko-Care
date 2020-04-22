@@ -446,19 +446,19 @@ function updateUI(){
 }
 
 function login(){
-  var userEmail=document.getElementById("emailfield").nodeValue;
-  var userPass=document.getElementById("pwfield").nodeValue;
-  console.log("email:"+userEmail+" pw:"+userPass);
+  // var userEmail=document.getElementById("emailfield").nodeValue;
+  // var userPass=document.getElementById("pwfield").nodeValue;
+  // console.log("email:"+userEmail+" pw:"+userPass);
   
 }
 function createUser(){
 }
 function cloudsave(){
-  //var userEmail=document.getElementById("emailfield").nodeValue;
-}
-firebase.auth().onAuthStateChanged(function(user)){
-  if(user){
+//   //var userEmail=document.getElementById("emailfield").nodeValue;
+// }
+// firebase.auth().onAuthStateChanged(function(user)){
+//   if(user){
 
-  }
-  else{}
+//   }
+//   else{}
 }
