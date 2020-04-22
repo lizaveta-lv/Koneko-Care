@@ -87,21 +87,15 @@ var timenow, timebefore, timediff;
 var account="Guest";
 var userEmail="Guest",userPass;
 window.localStorage.clear(); //use this to reset stats
-if (window.localStorage.getItem('catHealth') == null) {
-  //default values
-  catHealth = 100;
-  catHunger = 100;
-  catDomestication = 0;
-  money = 200;
-  food = 0;
-  medicine = 0;
-  choice = 0;
-  console.log('storage is empty');
-  savestate();
-} else {
-  loadstate();
-  console.log('info being loaded');
-}
+//default values
+catHealth = 100;
+catHunger = 100;
+catDomestication = 0;
+money = 200;
+food = 0;
+medicine = 0;
+choice = 0;
+savestate();
 
 function preload() {
   //load sprites
@@ -259,6 +253,7 @@ function getChoice3() {
   choice = 3;
 }
 document.getElementById('btnChoice').onclick = function () {
+  
   if (choice >= 1 && choice <= 3){
     document.getElementById('modalGetCat').style.display = 'none';
 
@@ -478,14 +473,18 @@ function increaseMoney() {
 document.getElementById('btnLogin').onclick = function () {
   userEmail=document.getElementById("emailfield").value;
   userPass=document.getElementById("pwfield").value;
-  console.log("email:"+userEmail+" pw:"+userPass);
-  firebase.auth().signInWithEmailAndPassword(userEmail, userPass).catch(function(error) {
-    // Handle Errors here.
-    var errorCode = error.code;
-    var errorMessage = error.message;
-    // ...
-    window.alert(errorMessage);
-    window.alert(error.code);
+  firebase.auth().signInWithEmailAndPassword(userEmail, userPass).then(function() {
+    
+    console.log("email:"+userEmail+" pw:"+userPass);
+    document.getElementById('modalMenu').style.display = 'none';
+    
+    console.log("USER LOGGED IN");
+    account=userEmail;
+    loadstate();
+    document.getElementById('modalText').innerHTML = 'Logged in as: '+account;
+    modalAlert.style.display = 'block';
+  }).catch(function(error) {
+    window.alert(error.message);
   });
 };
 document.getElementById('btnNewUser').onclick = function () {
@@ -498,6 +497,7 @@ document.getElementById('btnNewUser').onclick = function () {
     // ...
     window.alert(errorMessage);
   });
+  document.getElementById('modalMenu').style.display = 'none';
 };
 document.getElementById('btnClearAcc').onclick = function () {
   firebase.auth().signOut().then(function() {
@@ -514,14 +514,20 @@ document.getElementById('btnClearAcc').onclick = function () {
   window.localStorage.removeItem(account+'-food');
   window.localStorage.removeItem(account+'-medicine');
   window.localStorage.removeItem(account+'-timevalue');
+  document.getElementById('modalMenu').style.display = 'none';
+  document.getElementById('modalText').innerHTML = 'Logged in as: Guest';
+  modalAlert.style.display = 'block';
 };
 document.getElementById('btnLogOut').onclick = function () {
   firebase.auth().signOut().then(function() {
     account="Guest";
     loadstate();
+  document.getElementById('modalText').innerHTML = 'Logged in as: '+account;
+  modalAlert.style.display = 'block';
   }).catch(function(error) {
     window.alert(error.message);
   });
+  document.getElementById('modalMenu').style.display = 'none';
 };
 //============================================================================================================
 document.getElementById('btnBuyFood').onclick = function () {
@@ -644,6 +650,7 @@ function loadstate() {
   money = parseInt(window.localStorage.getItem(account+'-money'));
   food = parseInt(window.localStorage.getItem(account+'-food'));
   medicine = parseInt(window.localStorage.getItem(account+'-medicine'));
+  cat.setTexture('cat' + choice.toString(10));
   timebefore = new Date();
   timebefore.setTime(parseInt(window.localStorage.getItem(account+'-timevalue')));
   timenow = new Date();
@@ -655,6 +662,7 @@ function loadstate() {
     if (i % (decayspeed / 1000) == 0) offscreenDecay();
     if (i % (earnspeed / 1000) == 0) money++;
   }
+  updateUI();
 }
 function updateUI(){
   statText.setText(
@@ -670,14 +678,3 @@ function updateUI(){
     'Money: ' + money + ' Food: ' + food + ' Medicine: ' + medicine
   );
 }
-firebase.auth().onAuthStateChanged(function(user){
-  if(user){
-    account=userEmail;
-    loadstate();
-    console.log(userEmail);
-  }
-  else{
-    account="Guest";
-    loadstate();
-  }
-});
