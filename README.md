@@ -1,9 +1,8 @@
 # About
 
-Kineko Care is tamagochi-like web/mobile game where you forster kittens, domesticate them and help find them new homes after.
+Koneko Care is tamagochi-like web/mobile game where you forster kittens, domesticate them and help find them new homes after.
 
 Features:
-- On tap on flour kitten will go here.
 - App does not have connecion to the internet, so you can play offline.
 - App imitates though calculations the pasage of time for the kitten as if it happens in real time.
 
